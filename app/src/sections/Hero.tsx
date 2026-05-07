@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const wesRef = useRef<HTMLHeadingElement>(null);
+  const wesRef = useRef<HTMLImageElement>(null);
   const titleRefs = useRef<HTMLHeadingElement[]>([]);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
