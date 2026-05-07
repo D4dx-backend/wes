@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# env files (do not commit; Vite inlines VITE_* values into the bundle at build time)
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
