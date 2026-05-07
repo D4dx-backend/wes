@@ -1,0 +1,219 @@
+/* Scoped admin panel styling — kept visually identical to the original static admin */
+
+.admin-shell {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(233, 30, 99, 0.18), transparent 60%),
+    radial-gradient(800px 500px at 0% 110%, rgba(74, 20, 140, 0.35), transparent 60%),
+    linear-gradient(135deg, #0d0021 0%, #1a0033 50%, #2d004d 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+
+.admin-shell .admin-display {
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+.admin-shell .glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.admin-shell .glass-strong {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+}
+
+.admin-shell .pill {
+  border-radius: 9999px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-shell .pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-shell .pill-primary {
+  background: linear-gradient(90deg, #ffffff, #f0e6ff);
+  color: #1a0033;
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.18);
+}
+
+.admin-shell .pill-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(255, 255, 255, 0.32);
+}
+
+.admin-shell .pill-outline {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.admin-shell .pill-outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-shell .pill-danger {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+}
+
+.admin-shell .pill-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.admin-shell .input,
+.admin-shell select.input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.admin-shell .input:focus {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-shell .input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.admin-shell select.input option {
+  background: #1a0033;
+  color: #fff;
+}
+
+.admin-shell .badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.admin-shell table.data {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-shell table.data th {
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.admin-shell table.data th .arrow {
+  opacity: 0.4;
+  margin-left: 4px;
+}
+
+.admin-shell table.data th.active .arrow {
+  opacity: 1;
+  color: #fff;
+}
+
+.admin-shell table.data td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.admin-shell table.data tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-shell .scroll-x {
+  overflow-x: auto;
+}
+
+.admin-shell .scroll-x::-webkit-scrollbar {
+  height: 8px;
+}
+
+.admin-shell .scroll-x::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+}
+
+.admin-shell .toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(20, 0, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 60;
+  color: #fff;
+}
+
+.admin-shell .toast.error {
+  border-color: rgba(244, 67, 54, 0.5);
+}
+
+.admin-shell .toast.success {
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.admin-shell .spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  animation: admin-spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes admin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-shell .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 0, 20, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
