@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WES — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'system-ui', 'sans-serif'],
+            display: ['Syne', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(233, 30, 99, 0.18), transparent 60%),
+        radial-gradient(800px 500px at 0% 110%, rgba(74, 20, 140, 0.35), transparent 60%),
+        linear-gradient(135deg, #0D0021 0%, #1A0033 50%, #2D004D 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+    .glass-strong {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 20px;
+    }
+    .pill {
+      border-radius: 9999px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all .25s ease;
+      cursor: pointer;
+    }
+    .pill-primary {
+      background: linear-gradient(90deg, #ffffff, #f0e6ff);
+      color: #1A0033;
+      box-shadow: 0 4px 18px rgba(255,255,255,0.18);
+    }
+    .pill-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(255,255,255,0.32); }
+    .pill-outline {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+    .pill-outline:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.6); }
+    .input, select.input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    .input:focus { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.10); }
+    .input::placeholder { color: rgba(255,255,255,0.45); }
+    select.input option { background: #1A0033; color: #fff; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.85);
+    }
+
+    table.data { width: 100%; border-collapse: separate; border-spacing: 0; }
+    table.data th {
+      text-align: left;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    table.data th .arrow { opacity: .4; margin-left: 4px; }
+    table.data th.active .arrow { opacity: 1; color: #fff; }
+    table.data td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px;
+      vertical-align: top;
+    }
+    table.data tr:hover td { background: rgba(255,255,255,0.04); }
+
+    .scroll-x { overflow-x: auto; }
+    .scroll-x::-webkit-scrollbar { height: 8px; }
+    .scroll-x::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 8px; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 14px 20px; border-radius: 12px;
+      background: rgba(20,0,40,0.95);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      z-index: 60;
+    }
+    .toast.error { border-color: rgba(244, 67, 54, 0.5); }
+    .toast.success { border-color: rgba(76, 175, 80, 0.5); }
+
+    .spinner {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      animation: spin .8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(5,0,20,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <section id="login-view" class="min-h-screen flex items-center justify-center px-6">
+    <div class="glass-strong w-full max-w-md p-8">
+      <div class="mb-8 text-center">
+        <div class="font-display text-3xl font-bold tracking-tight">WES Admin</div>
+        <div class="text-white/60 text-sm mt-2">Sign in to manage registrations</div>
+      </div>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-2">Username</label>
+          <input id="login-username" type="text" autocomplete="username" required class="input" placeholder="admin" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-2">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" required class="input" placeholder="••••••••" />
+        </div>
+        <div id="login-error" class="hidden text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3"></div>
+        <button id="login-submit" type="submit" class="pill pill-primary w-full mt-2">Sign in</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard-view" class="hidden">
+    <header class="border-b border-white/10 backdrop-blur-md bg-black/20 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div>
+          <div class="font-display text-xl font-bold tracking-tight">WES Admin</div>
+          <div class="text-xs text-white/50">Registration Dashboard</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="export-btn" class="pill pill-outline text-sm hidden md:inline-flex">Export CSV</button>
+          <button id="logout-btn" class="pill pill-outline text-sm">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="stats-grid">
+        <div class="glass p-5">
+          <div class="text-xs uppercase tracking-wider text-white/50">Total</div>
+          <div class="font-display text-3xl font-bold mt-2" id="stat-total">—</div>
+        </div>
+        <div class="glass p-5">
+          <div class="text-xs uppercase tracking-wider text-white/50">Top Industry</div>
+          <div class="font-display text-lg font-semibold mt-2" id="stat-industry">—</div>
+        </div>
+        <div class="glass p-5">
+          <div class="text-xs uppercase tracking-wider text-white/50">Top Stage</div>
+          <div class="font-display text-lg font-semibold mt-2" id="stat-stage">—</div>
+        </div>
+        <div class="glass p-5">
+          <div class="text-xs uppercase tracking-wider text-white/50">Top Scale</div>
+          <div class="font-display text-lg font-semibold mt-2" id="stat-scale">—</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="glass p-5">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-4">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Search</label>
+            <input id="f-search" class="input" placeholder="Name, email, phone, district, business…" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Industry</label>
+            <select id="f-industry" class="input"><option value="">All</option></select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Stage</label>
+            <select id="f-stage" class="input"><option value="">All</option></select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Scale</label>
+            <select id="f-scale" class="input"><option value="">All</option></select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">District</label>
+            <input id="f-district" class="input" placeholder="Any" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Sort by</label>
+            <select id="f-sortby" class="input">
+              <option value="createdAt">Submitted At</option>
+              <option value="fullName">Full Name</option>
+              <option value="age">Age</option>
+              <option value="email">Email</option>
+              <option value="district">District</option>
+              <option value="industry">Industry</option>
+              <option value="businessStage">Stage</option>
+              <option value="businessScale">Scale</option>
+              <option value="ventureName">Venture</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Direction</label>
+            <select id="f-sortdir" class="input">
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">Per page</label>
+            <select id="f-limit" class="input">
+              <option>10</option>
+              <option selected>20</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </div>
+          <div class="md:col-span-5 flex items-end gap-3">
+            <button id="reset-filters" class="pill pill-outline text-sm">Reset</button>
+            <div class="text-sm text-white/50 self-center" id="result-count"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="glass overflow-hidden">
+        <div class="scroll-x">
+          <table class="data">
+            <thead>
+              <tr id="thead-row">
+                <th data-sort="fullName">Full Name <span class="arrow">↕</span></th>
+                <th data-sort="age">Age <span class="arrow">↕</span></th>
+                <th>Contact</th>
+                <th data-sort="district">District <span class="arrow">↕</span></th>
+                <th>Venture</th>
+                <th data-sort="industry">Industry <span class="arrow">↕</span></th>
+                <th data-sort="businessStage">Stage <span class="arrow">↕</span></th>
+                <th data-sort="businessScale">Scale <span class="arrow">↕</span></th>
+                <th data-sort="createdAt" class="active">Submitted <span class="arrow">↓</span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rows-body">
+              <tr><td colspan="10" class="text-center py-10 text-white/50"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/10">
+          <div class="text-sm text-white/50" id="page-info">—</div>
+          <div class="flex items-center gap-2">
+            <button id="prev-page" class="pill pill-outline text-sm">Previous</button>
+            <button id="next-page" class="pill pill-outline text-sm">Next</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Detail Modal -->
+  <div id="detail-modal" class="modal-backdrop hidden">
+    <div class="glass-strong max-w-2xl w-[92%] max-h-[88vh] overflow-y-auto p-7">
+      <div class="flex items-start justify-between mb-5">
+        <div>
+          <div class="text-xs uppercase tracking-widest text-white/50">Registration</div>
+          <div class="font-display text-2xl font-bold" id="detail-name">—</div>
+        </div>
+        <button id="detail-close" class="text-white/60 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <div id="detail-body" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"></div>
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <button id="detail-delete" class="pill pill-outline text-sm border-red-400/40 text-red-200 hover:bg-red-500/10">Delete</button>
+        <button id="detail-close-2" class="pill pill-primary text-sm">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+
+  <script>
+    const API = ''; // same origin
+    const TOKEN_KEY = 'wes_admin_token';
+
+    const state = {
+      token: localStorage.getItem(TOKEN_KEY) || null,
+      page: 1,
+      limit: 20,
+      sortBy: 'createdAt',
+      sortDir: 'desc',
+      total: 0,
+      pages: 1,
+      filters: { search: '', industry: '', businessStage: '', businessScale: '', district: '' },
+      currentDetail: null,
+      options: { industry: [], businessStage: [], businessScale: [] },
+    };
+
+    const $ = (sel) => document.querySelector(sel);
+
+    function showToast(msg, kind = 'success') {
+      const el = $('#toast');
+      el.className = 'toast ' + kind;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 2800);
+    }
+
+    async function api(path, opts = {}) {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+      if (state.token) headers.Authorization = 'Bearer ' + state.token;
+      const res = await fetch(API + path, Object.assign({}, opts, { headers }));
+      if (res.status === 401) {
+        logout();
+        throw new Error('Session expired');
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    }
+
+    /* ---------------- LOGIN ---------------- */
+    $('#login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = $('#login-error');
+      errEl.classList.add('hidden');
+      const btn = $('#login-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      try {
+        const data = await api('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: $('#login-username').value,
+            password: $('#login-password').value,
+          }),
+        });
+        state.token = data.token;
+        localStorage.setItem(TOKEN_KEY, data.token);
+        await enterDashboard();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign in';
+      }
+    });
+
+    function logout() {
+      state.token = null;
+      localStorage.removeItem(TOKEN_KEY);
+      $('#dashboard-view').classList.add('hidden');
+      $('#login-view').classList.remove('hidden');
+    }
+
+    $('#logout-btn').addEventListener('click', logout);
+
+    /* ---------------- DASHBOARD ---------------- */
+    async function enterDashboard() {
+      $('#login-view').classList.add('hidden');
+      $('#dashboard-view').classList.remove('hidden');
+      await loadOptions();
+      await Promise.all([loadStats(), loadList()]);
+    }
+
+    async function loadOptions() {
+      try {
+        const data = await fetch(API + '/api/registrations/options').then(r => r.json());
+        state.options = data;
+        const map = [
+          ['#f-industry', data.industry],
+          ['#f-stage', data.businessStage],
+          ['#f-scale', data.businessScale],
+        ];
+        for (const [sel, items] of map) {
+          const node = $(sel);
+          const current = node.value;
+          node.innerHTML = '<option value="">All</option>' +
+            items.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+          if (current) node.value = current;
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    async function loadStats() {
+      try {
+        const s = await api('/api/admin/registrations/stats');
+        $('#stat-total').textContent = s.total ?? 0;
+        $('#stat-industry').textContent = s.byIndustry?.[0]?._id || '—';
+        $('#stat-stage').textContent = s.byStage?.[0]?._id || '—';
+        $('#stat-scale').textContent = s.byScale?.[0]?._id || '—';
+      } catch (e) { /* ignore */ }
+    }
+
+    async function loadList() {
+      const params = new URLSearchParams({
+        page: state.page,
+        limit: state.limit,
+        sortBy: state.sortBy,
+        sortDir: state.sortDir,
+      });
+      for (const [k, v] of Object.entries(state.filters)) if (v) params.set(k, v);
+
+      const tbody = $('#rows-body');
+      tbody.innerHTML = '<tr><td colspan="10" class="text-center py-10 text-white/50"><span class="spinner"></span></td></tr>';
+
+      try {
+        const data = await api('/api/admin/registrations?' + params.toString());
+        state.total = data.total;
+        state.pages = data.pages;
+        $('#result-count').textContent = `${data.total} result${data.total === 1 ? '' : 's'}`;
+        $('#page-info').textContent = `Page ${data.page} of ${data.pages} · ${data.total} total`;
+
+        if (!data.items.length) {
+          tbody.innerHTML = '<tr><td colspan="10" class="text-center py-10 text-white/50">No registrations match these filters.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.items.map(it => `
+          <tr data-id="${it._id}">
+            <td class="font-medium">${escapeHtml(it.fullName || '')}</td>
+            <td>${it.age ?? ''}</td>
+            <td>
+              <div>${escapeHtml(it.email || '')}</div>
+              <div class="text-white/50 text-xs mt-0.5">${escapeHtml(it.whatsappNumber || '')}</div>
+            </td>
+            <td>${escapeHtml(it.district || '')}</td>
+            <td><div class="max-w-[200px] truncate">${escapeHtml(it.ventureName || '')}</div></td>
+            <td><span class="badge">${escapeHtml(it.industry || '')}</span></td>
+            <td><span class="badge">${escapeHtml(it.businessStage || '')}</span></td>
+            <td><span class="badge">${escapeHtml(it.businessScale || '')}</span></td>
+            <td class="text-white/70 text-xs">${formatDate(it.createdAt)}</td>
+            <td><button class="pill pill-outline text-xs view-btn" data-id="${it._id}">View</button></td>
+          </tr>
+        `).join('');
+
+        tbody.querySelectorAll('.view-btn').forEach(btn => {
+          btn.addEventListener('click', () => openDetail(btn.dataset.id));
+        });
+
+        // header arrows
+        document.querySelectorAll('#thead-row th').forEach(th => {
+          const sort = th.getAttribute('data-sort');
+          if (!sort) return;
+          th.classList.toggle('active', sort === state.sortBy);
+          const arrow = th.querySelector('.arrow');
+          if (arrow) arrow.textContent = sort === state.sortBy ? (state.sortDir === 'asc' ? '↑' : '↓') : '↕';
+        });
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-10 text-red-300">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    /* ---------------- DETAIL ---------------- */
+    async function openDetail(id) {
+      try {
+        const it = await api('/api/admin/registrations/' + id);
+        state.currentDetail = it;
+        $('#detail-name').textContent = it.fullName || 'Registration';
+        const fields = [
+          ['Age', it.age],
+          ['WhatsApp', it.whatsappNumber],
+          ['Email', it.email],
+          ['District', it.district],
+          ['GPay', it.gpay],
+          ['Venture / Business', it.ventureName],
+          ['Industry / Sector', it.industry],
+          ['Business Stage', it.businessStage],
+          ['Business Scale', it.businessScale],
+          ['Submitted At', formatDate(it.createdAt, true)],
+        ];
+        $('#detail-body').innerHTML = fields.map(([label, val]) => `
+          <div>
+            <div class="text-xs uppercase tracking-wider text-white/50">${escapeHtml(label)}</div>
+            <div class="mt-1 break-words">${escapeHtml(val ?? '—')}</div>
+          </div>
+        `).join('');
+        $('#detail-modal').classList.remove('hidden');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function closeDetail() {
+      $('#detail-modal').classList.add('hidden');
+      state.currentDetail = null;
+    }
+
+    $('#detail-close').addEventListener('click', closeDetail);
+    $('#detail-close-2').addEventListener('click', closeDetail);
+    $('#detail-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'detail-modal') closeDetail();
+    });
+
+    $('#detail-delete').addEventListener('click', async () => {
+      if (!state.currentDetail) return;
+      if (!confirm(`Delete registration for ${state.currentDetail.fullName}? This cannot be undone.`)) return;
+      try {
+        await api('/api/admin/registrations/' + state.currentDetail._id, { method: 'DELETE' });
+        showToast('Registration deleted', 'success');
+        closeDetail();
+        await Promise.all([loadStats(), loadList()]);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    /* ---------------- FILTERS ---------------- */
+    function bindFilter(sel, key) {
+      const el = $(sel);
+      el.addEventListener('input', debounce(() => {
+        state.filters[key] = el.value;
+        state.page = 1;
+        loadList();
+      }, 250));
+      el.addEventListener('change', () => {
+        state.filters[key] = el.value;
+        state.page = 1;
+        loadList();
+      });
+    }
+    bindFilter('#f-search', 'search');
+    bindFilter('#f-industry', 'industry');
+    bindFilter('#f-stage', 'businessStage');
+    bindFilter('#f-scale', 'businessScale');
+    bindFilter('#f-district', 'district');
+
+    $('#f-sortby').addEventListener('change', () => { state.sortBy = $('#f-sortby').value; loadList(); });
+    $('#f-sortdir').addEventListener('change', () => { state.sortDir = $('#f-sortdir').value; loadList(); });
+    $('#f-limit').addEventListener('change', () => {
+      state.limit = parseInt($('#f-limit').value, 10) || 20;
+      state.page = 1;
+      loadList();
+    });
+
+    $('#reset-filters').addEventListener('click', () => {
+      state.filters = { search: '', industry: '', businessStage: '', businessScale: '', district: '' };
+      state.sortBy = 'createdAt';
+      state.sortDir = 'desc';
+      state.limit = 20;
+      state.page = 1;
+      $('#f-search').value = '';
+      $('#f-industry').value = '';
+      $('#f-stage').value = '';
+      $('#f-scale').value = '';
+      $('#f-district').value = '';
+      $('#f-sortby').value = 'createdAt';
+      $('#f-sortdir').value = 'desc';
+      $('#f-limit').value = '20';
+      loadList();
+    });
+
+    /* sort by clicking column headers */
+    document.querySelectorAll('#thead-row th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const sort = th.getAttribute('data-sort');
+        if (state.sortBy === sort) {
+          state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.sortBy = sort;
+          state.sortDir = 'asc';
+        }
+        $('#f-sortby').value = state.sortBy;
+        $('#f-sortdir').value = state.sortDir;
+        loadList();
+      });
+    });
+
+    /* pagination */
+    $('#prev-page').addEventListener('click', () => {
+      if (state.page > 1) { state.page--; loadList(); }
+    });
+    $('#next-page').addEventListener('click', () => {
+      if (state.page < state.pages) { state.page++; loadList(); }
+    });
+
+    /* export */
+    $('#export-btn').addEventListener('click', async () => {
+      try {
+        const res = await fetch(API + '/api/admin/registrations/export', {
+          headers: { Authorization: 'Bearer ' + state.token },
+        });
+        if (!res.ok) throw new Error('Export failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wes-registrations-${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    /* helpers */
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+    }
+    function formatDate(s, full = false) {
+      if (!s) return '—';
+      const d = new Date(s);
+      if (full) return d.toLocaleString();
+      return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    /* boot */
+    if (state.token) {
+      enterDashboard().catch(() => logout());
+    }
+  </script>
+</body>
+</html>
