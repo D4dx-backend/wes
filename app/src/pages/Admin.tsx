@@ -206,11 +206,11 @@ function Login({ onSuccess }: { onSuccess: (token: string) => void }) {
       <div className="glass-strong w-full max-w-md p-8">
         <div className="mb-8 text-center">
           <div className="admin-display text-3xl font-bold tracking-tight">WES Admin</div>
-          <div className="text-white/60 text-sm mt-2">Sign in to manage registrations</div>
+          <div className="text-foreground/60 text-sm mt-2">Sign in to manage registrations</div>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-2">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-2">
               Username
             </label>
             <input
@@ -224,7 +224,7 @@ function Login({ onSuccess }: { onSuccess: (token: string) => void }) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-2">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-2">
               Password
             </label>
             <input
@@ -532,11 +532,11 @@ function Dashboard({
 
   return (
     <section>
-      <header className="border-b border-white/10 backdrop-blur-md bg-black/20 sticky top-0 z-30">
+      <header className="border-b border-black/10 backdrop-blur-md bg-white/85 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <div className="admin-display text-xl font-bold tracking-tight">WES Admin</div>
-            <div className="text-xs text-white/50">Registration Dashboard</div>
+            <div className="text-xs text-foreground/50">Registration Dashboard</div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={onExport} className="pill pill-outline text-sm hidden md:inline-flex">
@@ -552,8 +552,8 @@ function Dashboard({
             onClick={() => setActiveTab('registrations')}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${
               activeTab === 'registrations'
-                ? 'border-white text-white'
-                : 'border-transparent text-white/50 hover:text-white/70'
+                ? 'border-[#e61980] text-[#e61980]'
+                : 'border-transparent text-foreground/50 hover:text-foreground/70'
             }`}
           >
             Registrations
@@ -562,8 +562,8 @@ function Dashboard({
             onClick={() => setActiveTab('payment-qr')}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${
               activeTab === 'payment-qr'
-                ? 'border-white text-white'
-                : 'border-transparent text-white/50 hover:text-white/70'
+                ? 'border-[#e61980] text-[#e61980]'
+                : 'border-transparent text-foreground/50 hover:text-foreground/70'
             }`}
           >
             Payment QR
@@ -652,23 +652,23 @@ function StatsGrid({ stats }: { stats: StatsResponse | null }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div className="glass p-5">
-        <div className="text-xs uppercase tracking-wider text-white/50">Total</div>
+        <div className="text-xs uppercase tracking-wider text-foreground/50">Total</div>
         <div className="admin-display text-3xl font-bold mt-2">{stats?.total ?? '—'}</div>
       </div>
       <div className="glass p-5">
-        <div className="text-xs uppercase tracking-wider text-white/50">Top Industry</div>
+        <div className="text-xs uppercase tracking-wider text-foreground/50">Top Industry</div>
         <div className="admin-display text-lg font-semibold mt-2">
           {stats?.byIndustry?.[0]?._id || '—'}
         </div>
       </div>
       <div className="glass p-5">
-        <div className="text-xs uppercase tracking-wider text-white/50">Top Stage</div>
+        <div className="text-xs uppercase tracking-wider text-foreground/50">Top Stage</div>
         <div className="admin-display text-lg font-semibold mt-2">
           {stats?.byStage?.[0]?._id || '—'}
         </div>
       </div>
       <div className="glass p-5">
-        <div className="text-xs uppercase tracking-wider text-white/50">Top Scale</div>
+        <div className="text-xs uppercase tracking-wider text-foreground/50">Top Scale</div>
         <div className="admin-display text-lg font-semibold mt-2">
           {stats?.byScale?.[0]?._id || '—'}
         </div>
@@ -730,7 +730,7 @@ function FiltersBar({
     <div className="glass p-5">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
         <div className="md:col-span-4">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Search
           </label>
           <input
@@ -741,7 +741,7 @@ function FiltersBar({
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Industry
           </label>
           <select
@@ -758,7 +758,7 @@ function FiltersBar({
           </select>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Stage
           </label>
           <select
@@ -775,7 +775,7 @@ function FiltersBar({
           </select>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Scale
           </label>
           <select
@@ -792,7 +792,7 @@ function FiltersBar({
           </select>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             District
           </label>
           <input
@@ -803,7 +803,7 @@ function FiltersBar({
           />
         </div>
         <div className="md:col-span-3">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Sort by
           </label>
           <select
@@ -819,7 +819,7 @@ function FiltersBar({
           </select>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Direction
           </label>
           <select
@@ -832,7 +832,7 @@ function FiltersBar({
           </select>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+          <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Per page
           </label>
           <select
@@ -850,7 +850,7 @@ function FiltersBar({
           <button onClick={onReset} className="pill pill-outline text-sm">
             Reset
           </button>
-          <div className="text-sm text-white/50 self-center">
+          <div className="text-sm text-foreground/50 self-center">
             {resultCount !== null && `${resultCount} result${resultCount === 1 ? '' : 's'}`}
           </div>
         </div>
@@ -932,7 +932,7 @@ function DataTable({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={10} className="text-center py-10 text-white/50">
+                <td colSpan={10} className="text-center py-10 text-foreground/50">
                   <span className="spinner" />
                 </td>
               </tr>
@@ -944,7 +944,7 @@ function DataTable({
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={10} className="text-center py-10 text-white/50">
+                <td colSpan={10} className="text-center py-10 text-foreground/50">
                   No registrations match these filters.
                 </td>
               </tr>
@@ -978,12 +978,12 @@ function DataTable({
                           <img
                             src={it.paymentScreenshot}
                             alt="Payment"
-                            className="w-10 h-10 rounded object-cover border border-white/10 hover:opacity-80 transition"
+                            className="w-10 h-10 rounded object-cover border border-black/10 hover:opacity-80 transition"
                           />
                         </a>
                       )
                     ) : (
-                      <span className="text-white/30 text-xs">—</span>
+                      <span className="text-foreground/30 text-xs">—</span>
                     )}
                   </td>
                   <td>
@@ -1003,7 +1003,7 @@ function DataTable({
                   <td>
                     <span className="badge admin-badge-fit">{it.industry || '—'}</span>
                   </td>
-                  <td className="text-white/70 text-xs">{formatDate(it.createdAt)}</td>
+                  <td className="text-foreground/70 text-xs">{formatDate(it.createdAt)}</td>
                   <td>
                     <button
                       className="pill pill-outline admin-table-action text-xs"
@@ -1018,8 +1018,8 @@ function DataTable({
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between px-5 py-4 border-t border-white/10">
-        <div className="text-sm text-white/50">
+      <div className="flex items-center justify-between px-5 py-4 border-t border-black/10">
+        <div className="text-sm text-foreground/50">
           {pages > 0 ? `Page ${page} of ${pages} · ${total} total` : '—'}
         </div>
         <div className="flex items-center gap-2">
@@ -1111,29 +1111,29 @@ function DetailModal({
       <div className="glass-strong admin-scrollbar-hide max-w-[58rem] w-[92%] max-h-[88vh] overflow-y-auto p-5 md:p-6">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <div className="text-xs uppercase tracking-widest text-white/50">Registration</div>
+            <div className="text-xs uppercase tracking-widest text-foreground/50">Registration</div>
             <div className="admin-display text-xl md:text-2xl font-bold leading-tight pr-4">
               {detail?.fullName || (detail ? '—' : '')}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-white/60 hover:text-white text-2xl leading-none"
+            className="text-foreground/60 hover:text-foreground text-2xl leading-none"
           >
             ×
           </button>
         </div>
 
         {!detail ? (
-          <div className="py-10 text-center text-white/50">
+          <div className="py-10 text-center text-foreground/50">
             <span className="spinner" />
           </div>
         ) : (
           <>
-            <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+            <div className="mb-5 rounded-2xl border border-black/10 bg-black/[0.03] p-4 md:p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.18em] text-white/45">Workflow</div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-foreground/45">Workflow</div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <span className={`badge ${workflowStep === 'pending' ? 'bg-yellow-500/20 text-yellow-200 border-yellow-500/30' : ''}`}>
                       1. Verify Payment
@@ -1146,7 +1146,7 @@ function DetailModal({
                     </span>
                   </div>
                 </div>
-                <div className="text-sm text-white/60 max-w-xs">
+                <div className="text-sm text-foreground/60 max-w-xs">
                   {workflowStep === 'pending' && 'Verify the payment first to unlock pass generation.'}
                   {workflowStep === 'verified' && 'Payment is verified. You can generate the attendee pass now.'}
                   {workflowStep === 'generated' && 'Pass is ready. Send it directly through WhatsApp from here.'}
@@ -1159,9 +1159,9 @@ function DetailModal({
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   {fields.map(([label, val]) => (
-                    <div key={label} className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                      <div className="text-xs uppercase tracking-wider text-white/50">{label}</div>
-                      <div className="mt-1 break-words text-white/90">
+                    <div key={label} className="rounded-xl border border-black/8 bg-white/[0.03] px-4 py-3">
+                      <div className="text-xs uppercase tracking-wider text-foreground/50">{label}</div>
+                      <div className="mt-1 break-words text-foreground/90">
                         {val === null || val === undefined || val === '' ? '—' : String(val)}
                       </div>
                     </div>
@@ -1170,7 +1170,7 @@ function DetailModal({
 
                 {detail.paymentScreenshot && (
                   <div className="mt-5">
-                    <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Payment Screenshot</div>
+                    <div className="text-xs uppercase tracking-wider text-foreground/50 mb-2">Payment Screenshot</div>
                     {detail.paymentScreenshot.toLowerCase().endsWith('.pdf') ? (
                       <a
                         href={detail.paymentScreenshot}
@@ -1185,7 +1185,7 @@ function DetailModal({
                         <img
                           src={detail.paymentScreenshot}
                           alt="Payment screenshot"
-                          className="max-w-full md:max-w-sm rounded-lg border border-white/10 hover:opacity-90 transition"
+                          className="max-w-full md:max-w-sm rounded-lg border border-black/10 hover:opacity-90 transition"
                         />
                       </a>
                     )}
@@ -1193,8 +1193,8 @@ function DetailModal({
                 )}
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="text-xs uppercase tracking-wider text-white/50 mb-3">Actions</div>
+              <div className="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
+                <div className="text-xs uppercase tracking-wider text-foreground/50 mb-3">Actions</div>
                 <div className="flex flex-col gap-2">
                   {!detail.paymentVerified && (
                     <button
@@ -1226,22 +1226,22 @@ function DetailModal({
                 </div>
 
                 {detail.entryPassUrl && (
-                  <div className="mt-4 border-t border-white/10 pt-4">
-                    <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Entry Pass</div>
+                  <div className="mt-4 border-t border-black/10 pt-4">
+                    <div className="text-xs uppercase tracking-wider text-foreground/50 mb-2">Entry Pass</div>
                     <a href={detail.entryPassUrl} target="_blank" rel="noopener noreferrer">
                       <img
                         src={detail.entryPassUrl}
                         alt="Entry pass"
-                        className="w-full rounded-lg border border-white/10 hover:opacity-90 transition"
+                        className="w-full rounded-lg border border-black/10 hover:opacity-90 transition"
                       />
                     </a>
                     {detail.entryPassId && (
-                      <div className="mt-2 text-xs text-white/50">
-                        Pass ID: <span className="font-mono text-white/70">{detail.entryPassId}</span>
+                      <div className="mt-2 text-xs text-foreground/50">
+                        Pass ID: <span className="font-mono text-foreground/70">{detail.entryPassId}</span>
                       </div>
                     )}
                     {detail.entryPassSentAt && (
-                      <div className="mt-1 text-xs text-white/50">
+                      <div className="mt-1 text-xs text-foreground/50">
                         Sent: {formatDate(detail.entryPassSentAt, true)}
                       </div>
                     )}
@@ -1314,11 +1314,11 @@ function ConfirmModal({
       }}
     >
       <div className="glass-strong w-[min(92vw,32rem)] p-7 md:p-8">
-        <div className="mb-4 inline-flex rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
+        <div className="mb-4 inline-flex rounded-full border border-black/12 bg-black/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-foreground/55">
           Confirmation
         </div>
         <h3 className="admin-display text-2xl font-bold leading-tight">{title}</h3>
-        <p className="mt-3 text-sm leading-6 text-white/68">{description}</p>
+        <p className="mt-3 text-sm leading-6 text-foreground/60">{description}</p>
         <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
@@ -1480,7 +1480,7 @@ function PaymentQRManager({
         <h3 className="admin-display text-lg font-bold mb-4">Add Payment QR</h3>
         <form onSubmit={onUpload} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
               QR Image *
             </label>
             <input
@@ -1488,11 +1488,11 @@ function PaymentQRManager({
               type="file"
               accept="image/jpeg,image/png,image/webp"
               onChange={(e) => setQrFile(e.target.files?.[0] || null)}
-              className="input text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-white/70 file:text-sm"
+              className="input text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-foreground/70 file:text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
               UPI ID *
             </label>
             <input
@@ -1504,7 +1504,7 @@ function PaymentQRManager({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
               Amount (₹) *
             </label>
             <input
@@ -1517,7 +1517,7 @@ function PaymentQRManager({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
               Label (optional)
             </label>
             <input
@@ -1539,14 +1539,14 @@ function PaymentQRManager({
       {/* QR List */}
       <div className="glass p-6">
         <h3 className="admin-display text-lg font-bold mb-4">Payment QR Configs</h3>
-        <p className="text-xs text-white/40 mb-4">Only one QR can be active at a time. The active QR is shown on the registration form.</p>
+        <p className="text-xs text-foreground/40 mb-4">Only one QR can be active at a time. The active QR is shown on the registration form.</p>
 
         {loading ? (
           <div className="text-center py-8">
             <span className="spinner" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-8 text-white/50 text-sm">
+          <div className="text-center py-8 text-foreground/50 text-sm">
             No payment QR configs yet. Add one above.
           </div>
         ) : (
@@ -1557,7 +1557,7 @@ function PaymentQRManager({
                 className={`rounded-xl border p-4 ${
                   item.isActive
                     ? 'border-green-500/40 bg-green-500/5'
-                    : 'border-white/10 bg-white/5'
+                    : 'border-black/10 bg-white/5'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -1573,15 +1573,15 @@ function PaymentQRManager({
                           Active
                         </span>
                       ) : (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/10 text-white/50 border border-white/10">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/10 text-foreground/50 border border-black/10">
                           Inactive
                         </span>
                       )}
                     </div>
-                    <div className="text-sm font-mono text-white/80 truncate">{item.upiId}</div>
-                    <div className="text-sm text-white/60">₹{item.amount.toLocaleString('en-IN')}</div>
+                    <div className="text-sm font-mono text-foreground/80 truncate">{item.upiId}</div>
+                    <div className="text-sm text-foreground/60">₹{item.amount.toLocaleString('en-IN')}</div>
                     {item.label && (
-                      <div className="text-xs text-white/40 mt-1">{item.label}</div>
+                      <div className="text-xs text-foreground/40 mt-1">{item.label}</div>
                     )}
                   </div>
                 </div>

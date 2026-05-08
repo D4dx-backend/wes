@@ -66,7 +66,7 @@ export default function Navbar() {
               onClick={() => scrollToSection('hero')}
               className="transition-all hover:opacity-80 shrink-0"
             >
-              <img src="/Wes.png" alt="WES" className="h-9 sm:h-10 md:h-12 object-contain" />
+              <img src="/Wes.png" alt="WES" className="h-12 sm:h-14 md:h-16 object-contain" />
             </button>
 
             {/* Desktop Nav */}

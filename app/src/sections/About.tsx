@@ -6,7 +6,7 @@ import { Users, Mic, Calendar } from 'lucide-react';
 gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
-  { icon: Users, number: '500+', label: 'Women Entrepreneurs' },
+  { icon: Users, number: '250+', label: 'Women Entrepreneurs' },
   { icon: Mic, number: '10+', label: 'Expert Speakers' },
   { icon: Calendar, number: '1', label: 'Day of Inspiration' },
 ];
