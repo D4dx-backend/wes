@@ -26,6 +26,10 @@
     --radius: 1rem;
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Outfit', sans-serif;

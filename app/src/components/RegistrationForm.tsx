@@ -30,6 +30,23 @@ const BUSINESS_STAGE_OPTIONS = [
 
 const BUSINESS_SCALE_OPTIONS = ['Home based', 'Small scale', 'Large scale'] as const;
 
+const KERALA_DISTRICTS = [
+  'Thiruvananthapuram',
+  'Kollam',
+  'Pathanamthitta',
+  'Alappuzha',
+  'Kottayam',
+  'Idukki',
+  'Ernakulam',
+  'Thrissur',
+  'Palakkad',
+  'Malappuram',
+  'Kozhikode',
+  'Wayanad',
+  'Kannur',
+  'Kasaragod',
+] as const;
+
 const schema = z.object({
   fullName: z.string().min(2, 'Please enter your full name').max(120),
   age: z
@@ -43,7 +60,7 @@ const schema = z.object({
     .max(20)
     .regex(/^[+\d\s\-()]+$/, 'Only digits and +, -, (), spaces are allowed'),
   email: z.string().email('Please enter a valid email').max(200),
-  district: z.string().min(2, 'Please enter your district').max(100),
+  district: z.enum(KERALA_DISTRICTS as unknown as [string, ...string[]], { message: 'Please select your district' }),
   ventureName: z.string().max(200).optional().or(z.literal('')),
   industry: z.enum(INDUSTRY_OPTIONS, { message: 'Select an industry' }),
   businessStage: z.enum(BUSINESS_STAGE_OPTIONS, { message: 'Select a stage' }),
@@ -329,12 +346,16 @@ export default function RegistrationForm({ trigger }: Props) {
 
                   <div>
                     <label className={labelClass}>District *</label>
-                    <input
-                      type="text"
+                    <select
                       className={inputClass}
-                      placeholder="e.g. Kozhikode"
+                      defaultValue=""
                       {...register('district')}
-                    />
+                    >
+                      <option value="" disabled>Select district</option>
+                      {KERALA_DISTRICTS.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
                     {errors.district && <p className={errorClass}>{errors.district.message}</p>}
                   </div>
 
