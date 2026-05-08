@@ -134,7 +134,7 @@ export default function RegistrationCTA() {
           ref={infoRef}
           className="mx-auto max-w-[20rem] text-sm text-foreground/60 opacity-0 sm:text-base"
         >
-          Saturday, June 20, 2026 · Manuelsons Malabar Palace, Kozhikode
+          Saturday, June 20, 2026 · KPM TRIPENTA HOTEL, Kozhikode
         </p>
       </div>
     </section>

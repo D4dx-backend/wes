@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Mail, Phone, Instagram, Facebook, Twitter } from 'lucide-react';
+import { Mail, Phone, Instagram, Facebook } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -123,25 +123,22 @@ export default function Footer() {
             {/* Social Icons */}
             <div className="mt-6 flex items-center justify-center gap-4 md:justify-start">
               <a
-                href="#"
+                href="https://www.instagram.com/wes_kerala"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-foreground/60 hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300"
                 aria-label="Instagram"
               >
                 <Instagram size={18} />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/wes_kerala"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-foreground/60 hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300"
                 aria-label="Facebook"
               >
                 <Facebook size={18} />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-foreground/60 hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300"
-                aria-label="Twitter"
-              >
-                <Twitter size={18} />
               </a>
             </div>
           </div>

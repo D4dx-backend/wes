@@ -13,32 +13,42 @@ const scheduleItems = [
   {
     time: '10:00 AM',
     title: 'Inaugural Session',
-    description: 'Opening remarks by distinguished guests and introduction to the summit\'s vision.',
+    description: 'Opening remarks by distinguished guests and introduction to the summit\'s vision of empowering women entrepreneurs.',
   },
   {
     time: '10:30 AM',
-    title: 'Keynote Address',
-    description: 'Inspiring keynote on women empowerment and entrepreneurship in today\'s world.',
+    title: 'Ethical & Value-Based Business',
+    description: 'Building businesses grounded in strong values — how ethics and principles drive sustainable growth.',
   },
   {
     time: '11:30 AM',
-    title: 'Panel Discussion',
-    description: 'Expert panel on leadership, innovation, and building successful businesses.',
+    title: 'Women Identity & Leadership',
+    description: 'Balancing personal identity and leadership roles — navigating the unique challenges women face in entrepreneurship.',
   },
   {
-    time: '01:00 PM',
+    time: '12:30 PM',
+    title: 'Panel Discussion',
+    description: 'Inspiring insights from successful women entrepreneurs sharing their journeys, challenges, and triumphs.',
+  },
+  {
+    time: '01:30 PM',
     title: 'Networking Lunch',
-    description: 'A refined lunch experience at Manuelsons Malabar Palace with continued networking.',
+    description: 'A curated lunch experience at KPM TRIPENTA HOTEL with continued networking and peer connections.',
   },
   {
     time: '02:30 PM',
-    title: 'Workshop Sessions',
-    description: 'Interactive workshops on business growth, digital marketing, and financial planning.',
+    title: 'Digital Marketing & Branding',
+    description: 'How to market and brand your business digitally — practical strategies to build your online presence.',
+  },
+  {
+    time: '03:30 PM',
+    title: 'Business Design Thinking',
+    description: 'Strategies for innovation and scaling — creative problem-solving approaches to grow your enterprise.',
   },
   {
     time: '04:30 PM',
-    title: 'Closing Ceremony',
-    description: 'Recognition of participants, closing remarks, and photo session.',
+    title: 'Special Consultation Desks',
+    description: 'One-on-one expert guidance on Business Growth, Startup Ecosystem, and Ethical Business practices.',
   },
 ];
 

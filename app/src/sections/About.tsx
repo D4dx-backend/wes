@@ -131,7 +131,7 @@ export default function About() {
               ref={headingRef}
               className="font-['Syne'] text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 sm:mb-8 opacity-0 leading-[1.1] tracking-tight"
             >
-              A Premier Gathering for <span className="text-primary">Visionary Women</span>
+              A Premier Platform for <span className="text-primary">Muslim Women Entrepreneurs</span>
             </h2>
 
             {/* Body Paragraphs */}
@@ -140,19 +140,19 @@ export default function About() {
               className="space-y-5 sm:space-y-6"
             >
               <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-                We are delighted to invite you to the Women Entrepreneurs Summit, a premier gathering 
-                dedicated to celebrating and empowering the spirit of female innovation and leadership.
+                Women Entrepreneurs Summit (WES) is a unique program that brings together Muslim women
+                entrepreneurs from various sectors across Kerala — designed as a platform where women
+                who aspire to grow in entrepreneurship can gain guidance, inspiration, and networking
+                opportunities all in one place.
               </p>
               <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-                This inspiring event will be held on Saturday, June 20, 2026, at the elegant 
-                Manuelsons Malabar Palace, offering a refined and sophisticated setting for visionary 
-                women to connect, exchange ideas, and grow together.
+                Many businesses still face challenges such as lack of proper guidance, limited market
+                knowledge, and weak professional networks. WES addresses this by creating a dynamic
+                platform for knowledge sharing, experience exchange, and exploring new opportunities.
               </p>
               <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-                Join us for a day of meaningful conversations, knowledge sharing, and networking with 
-                like-minded entrepreneurs and leaders. The summit aims to inspire, support, and 
-                strengthen the journey of women in business by creating opportunities for collaboration 
-                and professional growth.
+                Join us on June 20, 2026, at KPM TRIPENTA HOTEL, Kozhikode — for a transformative
+                day designed to empower, connect, and inspire women entrepreneurs across Kerala.
               </p>
             </div>
           </div>

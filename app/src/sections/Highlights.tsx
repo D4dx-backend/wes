@@ -1,34 +1,40 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Network, BookOpen, TrendingUp, HeartHandshake } from 'lucide-react';
+import { Network, BookOpen, TrendingUp, HeartHandshake, Mic } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const highlights = [
   {
-    icon: Network,
-    title: 'Networking & Collaboration',
+    icon: BookOpen,
+    title: 'Ethical & Value-Based Business',
     description:
-      'Connect with fellow women entrepreneurs, share experiences, and build lasting professional relationships.',
+      'Building businesses grounded in strong values and ethical principles that create lasting, sustainable impact.',
   },
   {
-    icon: BookOpen,
-    title: 'Expert Talks & Knowledge Sharing',
+    icon: Network,
+    title: 'Women Identity & Leadership',
     description:
-      'Learn from industry leaders and successful entrepreneurs through insightful sessions and panel discussions.',
+      'Balancing personal identity and leadership roles — navigating the unique challenges women face in entrepreneurship.',
+  },
+  {
+    icon: Mic,
+    title: 'Panel Discussion',
+    description:
+      'Inspiring insights from successful women entrepreneurs sharing their journeys, challenges, and triumphs.',
   },
   {
     icon: TrendingUp,
-    title: 'Leadership & Business Insights',
+    title: 'Digital Marketing & Branding',
     description:
-      'Gain valuable strategies and insights to elevate your business and leadership skills to the next level.',
+      'Learn how to market and brand your business digitally — practical strategies to build your online presence.',
   },
   {
     icon: HeartHandshake,
-    title: 'Meaningful Professional Connections',
+    title: 'Business Design Thinking',
     description:
-      'Forge meaningful connections that support your entrepreneurial journey and open new opportunities.',
+      'Strategies for innovation and scaling — creative approaches to solve business challenges and grow your enterprise.',
   },
 ];
 
@@ -95,12 +101,12 @@ export default function Highlights() {
           >
             <span className="section-label text-primary block mb-4 sm:mb-6">What to Expect</span>
             <h2 className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-5 sm:mb-6">
-              An Inspiring Day of Growth &amp; Connection
+              Sessions Designed to Empower &amp; Inspire
             </h2>
             <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-              Join us for an inspiring day of networking, expert talks, and 
-              meaningful professional connections that will transform your 
-              entrepreneurial journey.
+              Five expert-led sessions covering business ethics, leadership, digital branding,
+              design thinking, and live panel discussions — plus Special Consultation Desks
+              for personalised guidance.
             </p>
           </div>
 
