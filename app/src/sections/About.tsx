@@ -103,7 +103,7 @@ export default function About() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative bg-background py-24 lg:py-32"
+      className="relative bg-background py-20 sm:py-24 lg:py-32"
     >
       {/* Top Wave Divider */}
       <div className="absolute top-0 left-0 w-full rotate-180">
@@ -115,13 +115,13 @@ export default function About() {
         </svg>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-2 mb-12 sm:mb-16">
           <div className="text-left">
             {/* Section Label */}
             <span
               ref={labelRef}
-              className="section-label text-primary block mb-6 opacity-0"
+              className="section-label text-primary block mb-4 sm:mb-6 opacity-0"
             >
               About the Summit
             </span>
@@ -129,7 +129,7 @@ export default function About() {
             {/* Section Heading */}
             <h2
               ref={headingRef}
-              className="font-['Syne'] text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-8 opacity-0 leading-[1.1] tracking-tight"
+              className="font-['Syne'] text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 sm:mb-8 opacity-0 leading-[1.1] tracking-tight"
             >
               A Premier Gathering for <span className="text-primary">Visionary Women</span>
             </h2>
@@ -137,7 +137,7 @@ export default function About() {
             {/* Body Paragraphs */}
             <div
               ref={parasRef}
-              className="space-y-6"
+              className="space-y-5 sm:space-y-6"
             >
               <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
                 We are delighted to invite you to the Women Entrepreneurs Summit, a premier gathering 
@@ -165,13 +165,13 @@ export default function About() {
             {stats.map((stat, i) => (
               <div
                 key={i}
-                className={`glass-card glass-card-hover p-6 lg:p-8 flex flex-col items-start cursor-default relative overflow-hidden ${i === 2 ? 'sm:col-span-2' : ''}`}
+                className={`glass-card glass-card-hover p-5 sm:p-6 lg:p-8 flex flex-col items-start cursor-default relative overflow-hidden ${i === 2 ? 'sm:col-span-2' : ''}`}
               >
                 <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/10 rounded-full blur-xl" />
-                <div className="w-14 h-14 mb-6 rounded-2xl bg-primary/5 border border-black/10 flex items-center justify-center backdrop-blur-md">
+                <div className="mb-5 h-12 w-12 rounded-2xl bg-primary/5 border border-black/10 flex items-center justify-center backdrop-blur-md sm:mb-6 sm:h-14 sm:w-14">
                   <stat.icon size={28} className="text-primary" />
                 </div>
-                <div className="font-['Syne'] text-4xl lg:text-5xl font-bold text-foreground mb-2 tracking-tight">
+                <div className="font-['Syne'] text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2 tracking-tight">
                   {stat.number}
                 </div>
                 <div className="text-sm font-medium uppercase tracking-wider text-foreground/60">

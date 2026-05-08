@@ -51,7 +51,7 @@ export default function Footer() {
     <footer
       id="contact"
       ref={footerRef}
-      className="relative bg-gray-50 border-t border-black/5 pt-16 pb-8"
+      className="relative bg-gray-50 border-t border-black/5 pt-12 sm:pt-16 pb-8"
     >
       {/* Top gradient line */}
       <div
@@ -61,14 +61,14 @@ export default function Footer() {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 sm:gap-12 md:grid-cols-3 mb-10 sm:mb-12">
           {/* Column 1 — Brand */}
-          <div className="footer-reveal opacity-0">
+          <div className="footer-reveal opacity-0 text-center md:text-left">
             <img 
               src="/Wes.png" 
               alt="WES" 
-              className="h-12 mb-4 object-contain"
+              className="h-12 mb-4 object-contain mx-auto md:mx-0"
             />
             <p className="text-sm text-foreground/60 mb-2">
               Women Entrepreneurs Summit 2026
@@ -81,7 +81,7 @@ export default function Footer() {
           </div>
 
           {/* Column 2 — Quick Links */}
-          <div className="footer-reveal opacity-0">
+          <div className="footer-reveal opacity-0 text-center md:text-left">
             <h4 className="text-sm font-semibold uppercase tracking-wider text-foreground/80 mb-4">
               Quick Links
             </h4>
@@ -90,7 +90,7 @@ export default function Footer() {
                 <button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
-                  className="block text-sm text-foreground/60 hover:text-primary hover:translate-x-1 transition-all duration-300"
+                  className="block w-full text-sm text-foreground/60 transition-all duration-300 hover:text-primary md:w-auto md:hover:translate-x-1"
                 >
                   {link.label}
                 </button>
@@ -99,21 +99,21 @@ export default function Footer() {
           </div>
 
           {/* Column 3 — Contact */}
-          <div className="footer-reveal opacity-0">
+          <div className="footer-reveal opacity-0 text-center md:text-left">
             <h4 className="text-sm font-semibold uppercase tracking-wider text-foreground/80 mb-4">
               Contact
             </h4>
             <div className="space-y-3">
               <a
                 href="mailto:womenwing.kerala@jih.in"
-                className="flex items-center gap-3 text-sm text-foreground/60 hover:text-primary transition-colors group"
+                className="group flex items-center justify-center gap-3 text-sm text-foreground/60 transition-colors hover:text-primary md:justify-start"
               >
                 <Mail size={16} className="group-hover:scale-110 transition-transform" />
                 jihwomenkerala@gmail.com
               </a>
               <a
                 href="tel:+9198XXXXXXXX"
-                className="flex items-center gap-3 text-sm text-foreground/60 hover:text-primary transition-colors group"
+                className="group flex items-center justify-center gap-3 text-sm text-foreground/60 transition-colors hover:text-primary md:justify-start"
               >
                 <Phone size={16} className="group-hover:scale-110 transition-transform" />
                 +91 9947846195
@@ -121,7 +121,7 @@ export default function Footer() {
             </div>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-4 mt-6">
+            <div className="mt-6 flex items-center justify-center gap-4 md:justify-start">
               <a
                 href="#"
                 className="w-10 h-10 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-foreground/60 hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300"
@@ -148,7 +148,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="footer-reveal border-t border-black/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 opacity-0">
+        <div className="footer-reveal flex flex-col items-center justify-between gap-3 border-t border-black/5 pt-6 text-center opacity-0 sm:flex-row sm:text-left">
           <p className="text-xs text-foreground/50">
             © 2026 Women Entrepreneurs Summit. All rights reserved.
           </p>

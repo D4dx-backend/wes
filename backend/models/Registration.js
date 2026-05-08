@@ -54,11 +54,30 @@ const registrationSchema = new mongoose.Schema(
       trim: true,
       maxlength: 100,
     },
-    gpay: {
+    paymentScreenshot: {
       type: String,
-      required: [true, 'GPay is required'],
+      required: [true, 'Payment screenshot is required'],
       trim: true,
-      maxlength: 100,
+    },
+    paymentVerified: {
+      type: Boolean,
+      default: false,
+    },
+    entryPassGenerated: {
+      type: Boolean,
+      default: false,
+    },
+    entryPassId: {
+      type: String,
+      trim: true,
+      sparse: true,
+    },
+    entryPassUrl: {
+      type: String,
+      trim: true,
+    },
+    entryPassSentAt: {
+      type: Date,
     },
     ventureName: {
       type: String,

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowRight, CheckCircle2, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, X, Copy, Upload, FileText, Check } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -44,7 +44,6 @@ const schema = z.object({
     .regex(/^[+\d\s\-()]+$/, 'Only digits and +, -, (), spaces are allowed'),
   email: z.string().email('Please enter a valid email').max(200),
   district: z.string().min(2, 'Please enter your district').max(100),
-  gpay: z.string().min(2, 'Please enter your GPay').max(100),
   ventureName: z.string().max(200).optional().or(z.literal('')),
   industry: z.enum(INDUSTRY_OPTIONS, { message: 'Select an industry' }),
   businessStage: z.enum(BUSINESS_STAGE_OPTIONS, { message: 'Select a stage' }),
@@ -52,6 +51,12 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+
+type ActiveQR = {
+  qrImage: string;
+  upiId: string;
+  amount: number;
+};
 
 const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
@@ -70,6 +75,13 @@ export default function RegistrationForm({ trigger }: Props) {
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [activeQR, setActiveQR] = useState<ActiveQR | null>(null);
+  const [qrLoading, setQrLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [screenshotError, setScreenshotError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -83,20 +95,103 @@ export default function RegistrationForm({ trigger }: Props) {
     },
   });
 
+  // Fetch active QR on mount
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    setQrLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/registrations/active-qr`);
+        if (res.ok) {
+          const data = await res.json();
+          if (active) setActiveQR(data);
+        } else {
+          if (active) setActiveQR(null);
+        }
+      } catch {
+        if (active) setActiveQR(null);
+      } finally {
+        if (active) setQrLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [open]);
+
+  const handleCopyUPI = async () => {
+    if (!activeQR?.upiId) return;
+    try {
+      await navigator.clipboard.writeText(activeQR.upiId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setScreenshotError(null);
+
+    if (!file) {
+      setScreenshotFile(null);
+      setScreenshotPreview(null);
+      return;
+    }
+
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      setScreenshotError('Only JPEG, PNG, WebP images and PDF files are allowed');
+      setScreenshotFile(null);
+      setScreenshotPreview(null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setScreenshotError('File too large. Maximum size is 5MB.');
+      setScreenshotFile(null);
+      setScreenshotPreview(null);
+      return;
+    }
+
+    setScreenshotFile(file);
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setScreenshotPreview(url);
+    } else {
+      setScreenshotPreview(null);
+    }
+  };
+
   const onSubmit = async (values: FormValues) => {
     setServerError(null);
+
+    if (!screenshotFile) {
+      setScreenshotError('Please upload your payment screenshot');
+      return;
+    }
+
     if (!API_URL) {
       setServerError('Registration is temporarily unavailable. Please try again later.');
       return;
     }
+
     try {
+      const formData = new FormData();
+      formData.append('fullName', values.fullName);
+      formData.append('age', String(values.age));
+      formData.append('whatsappNumber', values.whatsappNumber);
+      formData.append('email', values.email);
+      formData.append('district', values.district);
+      formData.append('ventureName', values.ventureName?.trim() || 'N/A');
+      formData.append('industry', values.industry);
+      formData.append('businessStage', values.businessStage);
+      formData.append('businessScale', values.businessScale);
+      formData.append('paymentScreenshot', screenshotFile);
+
       const res = await fetch(`${API_URL}/api/registrations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...values,
-          ventureName: values.ventureName?.trim() || 'N/A',
-        }),
+        body: formData,
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -111,10 +206,13 @@ export default function RegistrationForm({ trigger }: Props) {
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {
-      // reset after close transition
       setTimeout(() => {
         setSubmitted(false);
         setServerError(null);
+        setScreenshotFile(null);
+        setScreenshotPreview(null);
+        setScreenshotError(null);
+        setCopied(false);
         reset({ ventureName: 'N/A' });
       }, 250);
     }
@@ -125,10 +223,10 @@ export default function RegistrationForm({ trigger }: Props) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         showCloseButton={false}
-        className="!bg-transparent border-0 p-0 sm:max-w-2xl max-w-[calc(100%-1.5rem)] max-h-[92vh] overflow-hidden"
+        className="max-h-[92vh] max-w-[calc(100%-1rem)] overflow-hidden border-0 !bg-transparent p-0 sm:max-w-2xl"
       >
         <div
-          className="relative rounded-2xl overflow-hidden border border-black/5 bg-white shadow-[0_25px_80px_rgba(0,0,0,0.15)]"
+          className="relative overflow-hidden rounded-[1.35rem] border border-black/5 bg-white shadow-[0_25px_80px_rgba(0,0,0,0.15)] sm:rounded-2xl"
         >
           {/* Close button */}
           <button
@@ -141,7 +239,7 @@ export default function RegistrationForm({ trigger }: Props) {
           </button>
 
           {submitted ? (
-            <div className="px-8 py-14 text-center">
+            <div className="px-5 py-12 text-center sm:px-8 sm:py-14">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-5">
                 <CheckCircle2 size={36} className="text-emerald-600" />
               </div>
@@ -162,9 +260,9 @@ export default function RegistrationForm({ trigger }: Props) {
             </div>
           ) : (
             <div className="overflow-y-auto max-h-[92vh] scrollbar-hide" data-lenis-prevent>
-              <div className="px-7 sm:px-9 pt-8 pb-6 border-b border-black/10">
+              <div className="border-b border-black/10 px-5 pb-5 pt-7 sm:px-9 sm:pb-6 sm:pt-8">
                 <span className="section-label text-primary">Reserve your seat</span>
-                <h3 className="font-['Syne'] text-3xl sm:text-4xl font-bold text-foreground mt-2 leading-tight">
+                <h3 className="mt-2 font-['Syne'] text-2xl font-bold leading-tight text-foreground sm:text-4xl">
                   Register for WES 2026
                 </h3>
                 <p className="text-foreground/60 text-sm mt-2">
@@ -174,10 +272,10 @@ export default function RegistrationForm({ trigger }: Props) {
 
               <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="px-7 sm:px-9 py-7 space-y-5"
+                className="space-y-5 px-5 py-5 sm:px-9 sm:py-7"
                 noValidate
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                   <div className="sm:col-span-2">
                     <label className={labelClass}>Full Name *</label>
                     <input
@@ -240,15 +338,124 @@ export default function RegistrationForm({ trigger }: Props) {
                     {errors.district && <p className={errorClass}>{errors.district.message}</p>}
                   </div>
 
+                  {/* Payment Section */}
                   <div className="sm:col-span-2">
-                    <label className={labelClass}>GPay *</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="GPay number or UPI ID"
-                      {...register('gpay')}
-                    />
-                    {errors.gpay && <p className={errorClass}>{errors.gpay.message}</p>}
+                    <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4 sm:p-5 space-y-4">
+                      <div className="text-center">
+                        <span className="inline-block text-xs font-semibold uppercase tracking-[0.12em] text-primary bg-primary/10 px-3 py-1 rounded-full">
+                          Payment
+                        </span>
+                      </div>
+
+                      {qrLoading ? (
+                        <div className="flex items-center justify-center py-6">
+                          <span className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                        </div>
+                      ) : !activeQR ? (
+                        <div className="text-center py-4 text-foreground/60 text-sm">
+                          Payment information is currently unavailable. Please try again later.
+                        </div>
+                      ) : (
+                        <>
+                          {/* Amount */}
+                          <div className="text-center">
+                            <span className="text-2xl font-bold text-foreground">
+                              ₹{activeQR.amount.toLocaleString('en-IN')}
+                            </span>
+                            <p className="text-xs text-foreground/50 mt-1">Registration Fee</p>
+                          </div>
+
+                          {/* QR Code Image */}
+                          <div className="flex justify-center">
+                            <div className="bg-white rounded-xl p-3 shadow-sm border border-black/5 inline-block">
+                              <img
+                                src={activeQR.qrImage}
+                                alt="Payment QR Code"
+                                className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
+                              />
+                            </div>
+                          </div>
+
+                          {/* UPI ID with copy */}
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-sm text-foreground/70 font-mono bg-black/[0.04] px-3 py-1.5 rounded-lg border border-black/10">
+                              {activeQR.upiId}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleCopyUPI}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition"
+                            >
+                              {copied ? <Check size={14} /> : <Copy size={14} />}
+                              {copied ? 'Copied!' : 'Copy UPI'}
+                            </button>
+                          </div>
+
+                          <p className="text-xs text-foreground/50 text-center">
+                            Scan the QR code or copy the UPI ID to make your payment
+                          </p>
+                        </>
+                      )}
+
+                      {/* Screenshot Upload */}
+                      <div>
+                        <label className={labelClass}>Payment Screenshot *</label>
+                        <p className="text-xs text-foreground/50 mb-2">
+                          Upload a screenshot or PDF of your payment confirmation
+                        </p>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        {screenshotFile ? (
+                          <div className="flex items-center gap-3 rounded-xl border border-black/10 bg-black/[0.02] px-4 py-3">
+                            {screenshotPreview ? (
+                              <img
+                                src={screenshotPreview}
+                                alt="Preview"
+                                className="w-12 h-12 rounded-lg object-cover border border-black/10"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center">
+                                <FileText size={20} className="text-red-500" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{screenshotFile.name}</p>
+                              <p className="text-xs text-foreground/50">
+                                {(screenshotFile.size / 1024).toFixed(0)} KB
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScreenshotFile(null);
+                                setScreenshotPreview(null);
+                                setScreenshotError(null);
+                                if (fileInputRef.current) fileInputRef.current.value = '';
+                              }}
+                              className="text-foreground/40 hover:text-foreground transition"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-black/15 bg-black/[0.02] px-4 py-6 text-foreground/50 hover:border-primary/30 hover:bg-primary/[0.02] transition cursor-pointer"
+                          >
+                            <Upload size={24} />
+                            <span className="text-sm">Click to upload screenshot</span>
+                            <span className="text-xs">JPEG, PNG, WebP or PDF · Max 5MB</span>
+                          </button>
+                        )}
+                        {screenshotError && <p className={errorClass}>{screenshotError}</p>}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="sm:col-span-2">
@@ -306,11 +513,11 @@ export default function RegistrationForm({ trigger }: Props) {
 
                   <div className="sm:col-span-2">
                     <label className={labelClass}>Business Scale *</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       {BUSINESS_SCALE_OPTIONS.map((opt) => (
                         <label
                           key={opt}
-                          className="cursor-pointer rounded-xl border border-black/10 bg-black/[0.02] px-4 py-3 flex items-center gap-3 hover:bg-black/[0.04] transition has-[:checked]:bg-primary has-[:checked]:text-white has-[:checked]:border-primary"
+                          className="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 bg-black/[0.02] px-4 py-3 transition hover:bg-black/[0.04] has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-white"
                         >
                           <input
                             type="radio"
@@ -334,18 +541,18 @@ export default function RegistrationForm({ trigger }: Props) {
                   </div>
                 )}
 
-                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                   <button
                     type="button"
                     onClick={() => handleOpenChange(false)}
-                    className="pill-button text-foreground/70 hover:text-foreground"
+                    className="pill-button w-full text-foreground/70 hover:text-foreground sm:w-auto"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="pill-button bg-primary text-white hover:opacity-90 inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
+                    className="pill-button inline-flex w-full items-center justify-center gap-2 bg-primary text-white shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
                   >
                     {isSubmitting ? (
                       <>

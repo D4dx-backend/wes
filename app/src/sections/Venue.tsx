@@ -63,14 +63,14 @@ export default function Venue() {
     <section
       id="venue"
       ref={sectionRef}
-      className="relative min-h-[70vh] bg-background"
+      className="relative bg-background"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[60vh] bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-black/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-24">
+        <div className="grid min-h-[60vh] grid-cols-1 overflow-hidden rounded-[1.75rem] border border-black/5 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] lg:grid-cols-2">
           {/* Left Column — Visual Map */}
           <div
             ref={leftRef}
-            className="relative w-full h-[400px] lg:h-auto"
+            className="relative h-[280px] w-full sm:h-[360px] lg:h-auto"
           >
             <iframe 
               src="https://maps.google.com/maps?q=Manuelsons+Malabar+Palace,+Kozhikode&t=&z=15&ie=UTF8&iwloc=&output=embed" 
@@ -88,21 +88,21 @@ export default function Venue() {
         {/* Right Column — Content */}
         <div
           ref={rightRef}
-          className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-16 lg:py-24"
+          className="flex flex-col justify-center px-5 py-8 sm:px-10 sm:py-12 lg:px-16 lg:py-24"
         >
-          <span className="venue-reveal section-label text-primary mb-6 opacity-0">
+          <span className="venue-reveal section-label text-primary mb-4 sm:mb-6 opacity-0">
             The Venue
           </span>
 
-          <h2 className="venue-reveal font-['Syne'] text-4xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-4 opacity-0">
+          <h2 className="venue-reveal font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-3 sm:mb-4 opacity-0">
             Manuelsons Malabar Palace
           </h2>
 
-          <p className="venue-reveal font-['Outfit'] text-lg sm:text-xl font-light text-foreground/60 mb-6 opacity-0 uppercase tracking-widest">
+          <p className="venue-reveal font-['Outfit'] text-base sm:text-xl font-light text-foreground/60 mb-5 sm:mb-6 opacity-0 uppercase tracking-[0.2em] sm:tracking-widest">
             Elegance Meets Inspiration
           </p>
 
-          <p className="venue-reveal text-base text-foreground/70 leading-relaxed mb-8 opacity-0">
+          <p className="venue-reveal text-sm sm:text-base text-foreground/70 leading-relaxed mb-7 sm:mb-8 opacity-0">
             Located in the heart of Kozhikode, Manuelsons Malabar Palace offers a 
             refined and sophisticated setting for our summit. The venue&apos;s elegant 
             architecture and warm ambiance create the perfect environment for visionary 
@@ -110,16 +110,16 @@ export default function Venue() {
           </p>
 
           {/* Venue Features */}
-          <div className="venue-reveal space-y-4 mb-10 opacity-0">
+          <div className="venue-reveal space-y-3 sm:space-y-4 mb-8 sm:mb-10 opacity-0">
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="flex items-center gap-4 text-foreground/80"
+                className="flex items-center gap-3 sm:gap-4 text-foreground/80"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/20 backdrop-blur-sm">
+                <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/20 backdrop-blur-sm sm:h-12 sm:w-12">
                   <feature.icon size={20} className="text-primary" />
                 </div>
-                <span className="text-base sm:text-lg font-medium">
+                <span className="text-sm sm:text-lg font-medium">
                   {feature.label}
                 </span>
               </div>

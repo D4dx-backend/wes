@@ -1,6 +1,12 @@
 const express = require('express');
 const Registration = require('../models/Registration');
+const PaymentQR = require('../models/PaymentQR');
 const { requireAdmin } = require('../middleware/auth');
+const { qrImageUpload, getCdnUrl, deleteFile, keyFromUrl, s3 } = require('../config/spaces');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { generateEntryPass, generatePassId } = require('../utils/entryPassGenerator');
+const { sendWhatsAppImage } = require('../config/dxing');
+
 
 const router = express.Router();
 
@@ -47,7 +53,6 @@ router.get('/registrations', async (req, res) => {
         { whatsappNumber: re },
         { ventureName: re },
         { district: re },
-        { gpay: re },
       ];
     }
 
@@ -120,11 +125,15 @@ router.get('/registrations/export', async (req, res) => {
       ['whatsappNumber', 'WhatsApp'],
       ['email', 'Email'],
       ['district', 'District'],
-      ['gpay', 'GPay'],
+      ['paymentScreenshot', 'Payment Screenshot'],
+      ['paymentVerified', 'Payment Verified'],
       ['ventureName', 'Venture/Business'],
       ['industry', 'Industry'],
       ['businessStage', 'Business Stage'],
       ['businessScale', 'Business Scale'],
+      ['entryPassGenerated', 'Pass Generated'],
+      ['entryPassId', 'Pass ID'],
+      ['entryPassSentAt', 'Pass Sent At'],
     ];
 
     const escape = (val) => {
@@ -172,6 +181,201 @@ router.delete('/registrations/:id', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(400).json({ error: 'Invalid id' });
+  }
+});
+
+/* ===================== PAYMENT QR MANAGEMENT ===================== */
+
+// List all payment QR configs
+router.get('/payment-qr', async (_req, res) => {
+  try {
+    const items = await PaymentQR.find({}).sort({ createdAt: -1 }).lean();
+    res.json({ items });
+  } catch (err) {
+    console.error('[admin] payment-qr list error:', err);
+    res.status(500).json({ error: 'Failed to load payment QR configs' });
+  }
+});
+
+// Create a new payment QR config
+router.post('/payment-qr', (req, res) => {
+  const upload = qrImageUpload.single('qrImage');
+
+  upload(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      const msg = uploadErr.code === 'LIMIT_FILE_SIZE'
+        ? 'File too large. Maximum size is 5MB.'
+        : uploadErr.message || 'File upload failed';
+      return res.status(400).json({ error: msg });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'QR image is required' });
+    }
+
+    try {
+      const { upiId, amount, label } = req.body || {};
+      if (!upiId || !amount) {
+        return res.status(400).json({ error: 'UPI ID and amount are required' });
+      }
+
+      const qrImageUrl = getCdnUrl(req.file.key);
+
+      const doc = await PaymentQR.create({
+        qrImage: qrImageUrl,
+        upiId: String(upiId).trim(),
+        amount: Number(amount),
+        label: label ? String(label).trim() : '',
+        isActive: false,
+      });
+
+      res.status(201).json({ ok: true, item: doc });
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        const fields = {};
+        for (const key of Object.keys(err.errors)) {
+          fields[key] = err.errors[key].message;
+        }
+        return res.status(400).json({ error: 'Validation failed', fields });
+      }
+      console.error('[admin] payment-qr create error:', err);
+      res.status(500).json({ error: 'Failed to create payment QR' });
+    }
+  });
+});
+
+// Activate a payment QR (auto-deactivates others via model hook)
+router.patch('/payment-qr/:id/activate', async (req, res) => {
+  try {
+    const doc = await PaymentQR.findById(req.params.id);
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    doc.isActive = true;
+    await doc.save(); // triggers pre-save hook to deactivate others
+    res.json({ ok: true, item: doc });
+  } catch (err) {
+    console.error('[admin] payment-qr activate error:', err);
+    res.status(400).json({ error: 'Failed to activate' });
+  }
+});
+
+// Deactivate a payment QR
+router.patch('/payment-qr/:id/deactivate', async (req, res) => {
+  try {
+    const doc = await PaymentQR.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    res.json({ ok: true, item: doc });
+  } catch (err) {
+    console.error('[admin] payment-qr deactivate error:', err);
+    res.status(400).json({ error: 'Failed to deactivate' });
+  }
+});
+
+// Delete a payment QR config
+router.delete('/payment-qr/:id', async (req, res) => {
+  try {
+    const doc = await PaymentQR.findByIdAndDelete(req.params.id);
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+
+    // Delete image from Spaces
+    const key = keyFromUrl(doc.qrImage);
+    if (key) await deleteFile(key);
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[admin] payment-qr delete error:', err);
+    res.status(400).json({ error: 'Failed to delete' });
+  }
+});
+
+/* ===================== PAYMENT VERIFICATION ===================== */
+
+router.patch('/registrations/:id/verify-payment', async (req, res) => {
+  try {
+    const doc = await Registration.findByIdAndUpdate(
+      req.params.id,
+      { paymentVerified: true },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    res.json({ ok: true, item: doc });
+  } catch (err) {
+    console.error('[admin] verify-payment error:', err);
+    res.status(400).json({ error: 'Failed to verify payment' });
+  }
+});
+
+/* ===================== ENTRY PASS GENERATION ===================== */
+
+router.post('/registrations/:id/generate-pass', async (req, res) => {
+  try {
+    const doc = await Registration.findById(req.params.id);
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+
+    if (!doc.paymentVerified) {
+      return res.status(400).json({ error: 'Payment must be verified before generating pass' });
+    }
+
+    // Generate pass ID and image
+    const passId = doc.entryPassId || generatePassId();
+    const imageBuffer = await generateEntryPass({
+      fullName: doc.fullName,
+      passId,
+    });
+
+    // Upload to DO Spaces
+    const folder = process.env.DO_SPACES_FOLDER ? `${process.env.DO_SPACES_FOLDER}/` : '';
+    const key = `${folder}entry-passes/${passId}.png`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.DO_SPACES_BUCKET,
+        Key: key,
+        Body: imageBuffer,
+        ContentType: 'image/png',
+        ACL: 'public-read',
+      })
+    );
+
+    const passUrl = getCdnUrl(key);
+
+    doc.entryPassId = passId;
+    doc.entryPassUrl = passUrl;
+    doc.entryPassGenerated = true;
+    await doc.save();
+
+    res.json({ ok: true, passId, passUrl, item: doc });
+  } catch (err) {
+    console.error('[admin] generate-pass error:', err);
+    res.status(500).json({ error: 'Failed to generate entry pass' });
+  }
+});
+
+/* ===================== SEND ENTRY PASS VIA WHATSAPP ===================== */
+
+router.post('/registrations/:id/send-pass', async (req, res) => {
+  try {
+    const doc = await Registration.findById(req.params.id);
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+
+    if (!doc.entryPassGenerated || !doc.entryPassUrl) {
+      return res.status(400).json({ error: 'Entry pass must be generated first' });
+    }
+
+    const caption = `🎟️ *WOMEN ENTREPRENEURS SUMMIT 2026*\n\nDear *${doc.fullName}*,\n\nYour entry pass has been confirmed! ✅\n\n📅 Date: 20 June 2026\n📍 Venue: Manuelsons Malabar Palace, Calicut\n🆔 Pass ID: *${doc.entryPassId}*\n\nPlease show this pass at the entrance for check-in.\n\nSee you at the summit! 🌟`;
+
+    await sendWhatsAppImage(doc.whatsappNumber, doc.entryPassUrl, caption);
+
+    doc.entryPassSentAt = new Date();
+    await doc.save();
+
+    res.json({ ok: true, sentAt: doc.entryPassSentAt });
+  } catch (err) {
+    console.error('[admin] send-pass error:', err);
+    res.status(500).json({ error: 'Failed to send entry pass: ' + err.message });
   }
 });
 

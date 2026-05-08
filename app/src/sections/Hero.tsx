@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
+import RegistrationForm from '../components/RegistrationForm';
 
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -102,42 +104,43 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // Generate random particles
-  const particles = Array.from({ length: 25 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    size: 2 + Math.random() * 3,
-    delay: Math.random() * 5,
-    duration: 4 + Math.random() * 4,
-  }));
+  const [particles] = useState(() =>
+    Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      size: 2 + Math.random() * 3,
+      delay: Math.random() * 5,
+      duration: 4 + Math.random() * 4,
+    }))
+  );
 
   return (
     <section
       id="hero"
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden gradient-hero"
+      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden gradient-hero"
     >
       {/* Floating Organic Shapes */}
       <img
         ref={shape1Ref}
         src="/shape-coral.png"
         alt=""
-        className="absolute right-[-10%] top-[10%] w-[60vw] max-w-[700px] opacity-0 pointer-events-none mix-blend-screen"
+        className="absolute right-[-18%] top-[8%] w-[72vw] max-w-[700px] opacity-0 pointer-events-none mix-blend-screen sm:right-[-10%] sm:top-[10%] sm:w-[60vw]"
         style={{ filter: 'blur(2px)' }}
       />
       <img
         ref={shape2Ref}
         src="/shape-gold.png"
         alt=""
-        className="absolute right-[5%] bottom-[10%] w-[35vw] max-w-[400px] opacity-0 pointer-events-none mix-blend-soft-light"
+        className="absolute right-[-4%] bottom-[10%] w-[44vw] max-w-[400px] opacity-0 pointer-events-none mix-blend-soft-light sm:right-[5%] sm:w-[35vw]"
         style={{ filter: 'blur(3px)' }}
       />
       <img
         ref={shape3Ref}
         src="/shape-magenta.png"
         alt=""
-        className="absolute left-[-15%] top-[30%] w-[50vw] max-w-[550px] opacity-0 pointer-events-none mix-blend-screen"
+        className="absolute left-[-28%] top-[26%] w-[68vw] max-w-[550px] opacity-0 pointer-events-none mix-blend-screen sm:left-[-15%] sm:top-[30%] sm:w-[50vw]"
         style={{ filter: 'blur(4px)' }}
       />
 
@@ -170,14 +173,14 @@ export default function Hero() {
       />
 
       {/* Hero Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div className="relative z-10 mx-auto max-w-4xl px-5 pb-20 pt-24 text-center sm:px-6 sm:pb-24 sm:pt-32">
         {/* Top Badge */}
         <div
           ref={badgeRef}
-          className="flex items-center justify-center gap-3 mb-8 opacity-0"
+          className="mb-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 opacity-0 sm:mb-8"
         >
           <span className="text-primary text-xs">&#9670;</span>
-          <span className="text-sm font-medium uppercase tracking-[0.15em] text-foreground/80">
+          <span className="max-w-[17rem] text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/80 sm:max-w-none sm:text-sm sm:tracking-[0.15em]">
             Jamaat-e-Islami Hind · Women&apos;s Wing Kerala
           </span>
           <span className="text-primary text-xs">&#9670;</span>
@@ -188,25 +191,25 @@ export default function Hero() {
           ref={wesRef}
           src="/Wes.png"
           alt="WES"
-          className="w-[200px] sm:w-[280px] lg:w-[350px] mx-auto mb-8 opacity-0 object-contain"
+          className="mx-auto mb-5 w-[148px] object-contain opacity-0 sm:mb-8 sm:w-[280px] lg:w-[350px]"
         />
 
         {/* Title Lines */}
         <h2
           ref={(el) => { if (el) titleRefs.current[0] = el; }}
-          className="font-['Syne'] text-[48px] sm:text-[64px] lg:text-[80px] font-bold text-foreground leading-[1.0] opacity-0 uppercase tracking-tight"
+          className="mx-auto max-w-[16rem] px-1 font-['Syne'] text-[clamp(1.8rem,7.5vw,2.3rem)] font-bold uppercase tracking-[-0.04em] text-foreground opacity-0 leading-[0.92] sm:max-w-none sm:px-0 sm:text-[64px] sm:tracking-tight lg:text-[80px]"
         >
           Women
         </h2>
         <h2
           ref={(el) => { if (el) titleRefs.current[1] = el; }}
-          className="font-['Syne'] text-[48px] sm:text-[64px] lg:text-[80px] font-bold text-foreground leading-[1.0] opacity-0 uppercase tracking-tight"
+          className="mx-auto max-w-[16rem] px-1 font-['Syne'] text-[clamp(1.55rem,6.6vw,2rem)] font-bold uppercase tracking-[-0.035em] text-foreground opacity-0 leading-[0.94] sm:max-w-none sm:px-0 sm:text-[64px] sm:tracking-tight lg:text-[80px]"
         >
           Entrepreneurs
         </h2>
         <h2
           ref={(el) => { if (el) titleRefs.current[2] = el; }}
-          className="font-['Syne'] text-[48px] sm:text-[64px] lg:text-[80px] font-bold text-foreground leading-[1.0] mb-8 opacity-0 uppercase tracking-tight"
+          className="mx-auto mb-5 max-w-[16rem] px-1 font-['Syne'] text-[clamp(1.8rem,7.5vw,2.3rem)] font-bold uppercase tracking-[-0.04em] text-foreground opacity-0 leading-[0.92] sm:mb-8 sm:max-w-none sm:px-0 sm:text-[64px] sm:tracking-tight lg:text-[80px]"
         >
           Summit
         </h2>
@@ -214,7 +217,7 @@ export default function Hero() {
         {/* Subtitle */}
         <p
           ref={subtitleRef}
-          className="text-lg sm:text-xl font-light italic text-foreground/70 mb-10 opacity-0"
+          className="mx-auto mb-7 max-w-[16rem] px-1 text-[0.95rem] font-light italic text-foreground/70 opacity-0 sm:mb-10 sm:max-w-xl sm:px-0 sm:text-xl"
         >
           Celebrating Innovation, Leadership &amp; Empowerment
         </p>
@@ -222,21 +225,32 @@ export default function Hero() {
         {/* Date Banner */}
         <div
           ref={bannerRef}
-          className="inline-flex items-center gap-4 sm:gap-6 bg-white/60 backdrop-blur-md border border-black/10 rounded-2xl px-6 sm:px-10 py-4 mb-10 opacity-0 shadow-sm"
+          className="inline-flex max-w-full flex-col items-center gap-3 rounded-2xl border border-black/10 bg-white/80 px-4 py-4 opacity-0 shadow-sm backdrop-blur-md sm:mb-10 sm:flex-row sm:gap-6 sm:px-10 sm:py-4"
         >
-          <div className="flex items-center gap-2 text-foreground text-sm sm:text-base font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-center text-xs font-medium text-foreground sm:text-base">
             <span className="text-primary">&#9670;</span>
             <span>JUNE 2026</span>
             <span className="text-primary">&#9670;</span>
           </div>
-          <div className="text-foreground font-bold text-[64px] sm:text-[80px] leading-none font-['Syne'] tracking-tighter">
+          <div className="font-['Syne'] text-[48px] font-bold leading-none tracking-tighter text-foreground sm:text-[80px]">
             20
           </div>
-          <div className="flex items-center gap-2 text-foreground text-sm sm:text-base font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-center text-xs font-medium text-foreground sm:text-base">
             <span>Saturday</span>
             <span className="text-primary">&#9670;</span>
             <span>Kozhikode</span>
           </div>
+        </div>
+
+        <div className="mt-5 sm:mt-6">
+          <RegistrationForm
+            trigger={
+              <button className="pill-button pill-button-primary mx-auto inline-flex w-full max-w-[16rem] items-center justify-center gap-2 border border-black/10 bg-white text-foreground shadow-sm hover:bg-gray-50 sm:w-auto sm:max-w-none">
+                Register Now
+                <ArrowRight size={16} />
+              </button>
+            }
+          />
         </div>
       </div>
 

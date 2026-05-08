@@ -62,7 +62,7 @@ export default function RegistrationCTA() {
     <section
       id="register"
       ref={sectionRef}
-      className="relative py-24 lg:py-32 gradient-hero overflow-hidden"
+      className="relative overflow-hidden py-20 sm:py-24 lg:py-32 gradient-hero"
     >
       {/* Decorative background shapes */}
       <img
@@ -78,17 +78,17 @@ export default function RegistrationCTA() {
         style={{ filter: 'blur(25px)' }}
       />
 
-      <div className="relative z-10 max-w-3xl mx-auto px-6 lg:px-8 text-center">
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2
           ref={headingRef}
-          className="font-['Syne'] text-4xl sm:text-5xl lg:text-[64px] font-bold text-white leading-[1.1] tracking-tight mb-6 opacity-0"
+          className="font-['Syne'] text-3xl sm:text-5xl lg:text-[64px] font-bold text-foreground leading-[1.1] tracking-tight mb-4 sm:mb-6 opacity-0"
         >
           Secure Your Place Today
         </h2>
 
         <p
           ref={bodyRef}
-          className="text-base sm:text-lg text-white/75 leading-relaxed mb-10 opacity-0"
+          className="mx-auto mb-8 max-w-xl text-sm leading-relaxed text-foreground/70 opacity-0 sm:mb-10 sm:text-lg"
         >
           Registration Fee: ₹1,000 per participant. Limited seats available. 
           Confirm your participation and be part of this transformative experience.
@@ -97,21 +97,21 @@ export default function RegistrationCTA() {
         {/* Price Display */}
         <div
           ref={priceRef}
-          className="mb-10 opacity-0"
+          className="mb-8 opacity-0 sm:mb-10"
         >
           <span
-            className="font-['Syne'] text-[64px] sm:text-[80px] font-bold tracking-tight"
+            className="font-['Syne'] text-[52px] sm:text-[80px] font-bold tracking-tight"
             style={{
-              background: 'linear-gradient(90deg, #FFFFFF, #E0E0E0)',
+              background: 'linear-gradient(90deg, #1A0033, #E91E63)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.3))',
+              filter: 'drop-shadow(0 10px 24px rgba(233, 30, 99, 0.18))',
             }}
           >
             ₹1,000
           </span>
-          <span className="block text-white/50 text-sm uppercase tracking-wider mt-2">
+          <span className="mt-2 block text-sm uppercase tracking-wider text-foreground/55">
             per participant
           </span>
         </div>
@@ -121,7 +121,7 @@ export default function RegistrationCTA() {
           trigger={
             <button
               ref={ctaRef}
-              className="pill-button pill-button-primary inline-flex items-center gap-3 text-xl px-12 py-5 mb-8 opacity-0 animate-pulse-glow"
+              className="pill-button pill-button-primary mb-7 inline-flex w-full max-w-[18rem] items-center justify-center gap-3 px-8 py-4 text-base opacity-0 animate-pulse-glow sm:mb-8 sm:max-w-none sm:px-12 sm:py-5 sm:text-xl"
             >
               Register Now
               <ArrowRight size={22} />
@@ -132,7 +132,7 @@ export default function RegistrationCTA() {
         {/* Event Info */}
         <p
           ref={infoRef}
-          className="text-white/60 text-base opacity-0"
+          className="mx-auto max-w-[20rem] text-sm text-foreground/60 opacity-0 sm:text-base"
         >
           Saturday, June 20, 2026 · Manuelsons Malabar Palace, Kozhikode
         </p>

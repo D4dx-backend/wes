@@ -1,11 +1,13 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const Registration = require('../models/Registration');
+const PaymentQR = require('../models/PaymentQR');
 const {
   INDUSTRY_OPTIONS,
   BUSINESS_STAGE_OPTIONS,
   BUSINESS_SCALE_OPTIONS,
 } = require('../models/Registration');
+const { paymentScreenshotUpload, getCdnUrl } = require('../config/spaces');
 
 const router = express.Router();
 
@@ -25,55 +27,88 @@ router.get('/options', (_req, res) => {
   });
 });
 
-router.post('/', submitLimiter, async (req, res) => {
+// Public endpoint: get the currently active payment QR
+router.get('/active-qr', async (_req, res) => {
   try {
-    const {
-      fullName,
-      age,
-      whatsappNumber,
-      email,
-      district,
-      gpay,
-      ventureName,
-      industry,
-      businessStage,
-      businessScale,
-    } = req.body || {};
-
-    const ageNum = Number(age);
-
-    const doc = await Registration.create({
-      fullName: typeof fullName === 'string' ? fullName.trim() : fullName,
-      age: ageNum,
-      whatsappNumber: typeof whatsappNumber === 'string' ? whatsappNumber.trim() : whatsappNumber,
-      email: typeof email === 'string' ? email.trim().toLowerCase() : email,
-      district: typeof district === 'string' ? district.trim() : district,
-      gpay: typeof gpay === 'string' ? gpay.trim() : gpay,
-      ventureName:
-        typeof ventureName === 'string' && ventureName.trim().length > 0
-          ? ventureName.trim()
-          : 'N/A',
-      industry,
-      businessStage,
-      businessScale,
-    });
-
-    return res.status(201).json({
-      ok: true,
-      id: doc._id,
-      message: 'Registration submitted successfully',
+    const qr = await PaymentQR.findOne({ isActive: true }).lean();
+    if (!qr) {
+      return res.status(404).json({ error: 'No active payment QR configured' });
+    }
+    res.json({
+      qrImage: qr.qrImage,
+      upiId: qr.upiId,
+      amount: qr.amount,
     });
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      const fields = {};
-      for (const key of Object.keys(err.errors)) {
-        fields[key] = err.errors[key].message;
-      }
-      return res.status(400).json({ error: 'Validation failed', fields });
-    }
-    console.error('[registration] error:', err);
-    return res.status(500).json({ error: 'Failed to submit registration' });
+    console.error('[registration] active-qr error:', err);
+    res.status(500).json({ error: 'Failed to load payment info' });
   }
+});
+
+router.post('/', submitLimiter, (req, res) => {
+  const upload = paymentScreenshotUpload.single('paymentScreenshot');
+
+  upload(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      const msg = uploadErr.code === 'LIMIT_FILE_SIZE'
+        ? 'File too large. Maximum size is 5MB.'
+        : uploadErr.message || 'File upload failed';
+      return res.status(400).json({ error: msg });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Payment screenshot is required' });
+    }
+
+    try {
+      const {
+        fullName,
+        age,
+        whatsappNumber,
+        email,
+        district,
+        ventureName,
+        industry,
+        businessStage,
+        businessScale,
+      } = req.body || {};
+
+      const ageNum = Number(age);
+      const screenshotUrl = getCdnUrl(req.file.key);
+
+      const doc = await Registration.create({
+        fullName: typeof fullName === 'string' ? fullName.trim() : fullName,
+        age: ageNum,
+        whatsappNumber: typeof whatsappNumber === 'string' ? whatsappNumber.trim() : whatsappNumber,
+        email: typeof email === 'string' ? email.trim().toLowerCase() : email,
+        district: typeof district === 'string' ? district.trim() : district,
+        paymentScreenshot: screenshotUrl,
+        ventureName:
+          typeof ventureName === 'string' && ventureName.trim().length > 0
+            ? ventureName.trim()
+            : 'N/A',
+        industry,
+        businessStage,
+        businessScale,
+      });
+
+      return res.status(201).json({
+        ok: true,
+        id: doc._id,
+        message: 'Registration submitted successfully',
+      });
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        const fields = {};
+        for (const key of Object.keys(err.errors)) {
+          fields[key] = err.errors[key].message;
+        }
+        return res.status(400).json({ error: 'Validation failed', fields });
+      }
+      console.error('[registration] error:', err);
+      return res.status(500).json({ error: 'Failed to submit registration' });
+    }
+  });
 });
 
 module.exports = router;

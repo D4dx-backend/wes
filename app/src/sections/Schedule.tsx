@@ -116,13 +116,13 @@ export default function Schedule() {
     <section
       id="schedule"
       ref={sectionRef}
-      className="relative bg-background py-24 lg:py-32 overflow-hidden"
+      className="relative overflow-hidden bg-background py-20 sm:py-24 lg:py-32"
     >
-      <div className="max-w-4xl mx-auto px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Label */}
         <span
           ref={labelRef}
-          className="section-label text-primary block text-center mb-6 opacity-0"
+          className="section-label text-primary block text-center mb-4 sm:mb-6 opacity-0"
         >
           Event Schedule
         </span>
@@ -130,7 +130,7 @@ export default function Schedule() {
         {/* Section Heading */}
         <h2
           ref={headingRef}
-          className="font-['Syne'] text-4xl sm:text-5xl lg:text-[56px] font-bold text-foreground text-center mb-16 opacity-0 leading-[1.1] tracking-tight"
+          className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground text-center mb-12 sm:mb-16 opacity-0 leading-[1.1] tracking-tight"
         >
           A Day Designed for <span className="text-primary">Impact</span>
         </h2>
@@ -140,32 +140,32 @@ export default function Schedule() {
           {/* Center Line */}
           <div
             ref={lineRef}
-            className="absolute left-6 lg:left-1/2 lg:-translate-x-px top-0 bottom-0 w-[2px] origin-top bg-gradient-to-b from-primary via-primary/30 to-transparent"
+            className="absolute left-4 top-0 bottom-0 w-[2px] origin-top bg-gradient-to-b from-primary via-primary/30 to-transparent lg:left-1/2 lg:-translate-x-px"
           />
 
           {/* Timeline Items */}
-          <div className="space-y-10 lg:space-y-12">
+          <div className="space-y-8 sm:space-y-10 lg:space-y-12">
             {scheduleItems.map((item, i) => {
               const isLeft = i % 2 === 0;
               return (
                 <div
                   key={i}
-                  className={`timeline-item relative flex items-start gap-6 lg:gap-0 opacity-0 ${
+                  className={`timeline-item relative flex items-start gap-4 sm:gap-6 lg:gap-0 opacity-0 ${
                     isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'
                   }`}
                 >
                   {/* Dot on timeline */}
-                  <div className="absolute left-6 lg:left-1/2 -translate-x-1/2 w-5 h-5 rounded-full z-10 animate-pulse-dot flex items-center justify-center bg-white border-2 border-primary shadow-[0_0_15px_rgba(233,30,99,0.3)]">
+                  <div className="absolute left-4 z-10 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border-2 border-primary bg-white shadow-[0_0_15px_rgba(233,30,99,0.3)] animate-pulse-dot lg:left-1/2 lg:h-5 lg:w-5">
                     <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                   </div>
 
                   {/* Content Card */}
                   <div
-                    className={`ml-14 lg:ml-0 lg:w-[45%] ${
+                    className={`ml-10 sm:ml-14 lg:ml-0 lg:w-[45%] ${
                       isLeft ? 'lg:pr-12' : 'lg:pl-12'
                     }`}
                   >
-                    <div className="glass-card bg-white border border-black/5 p-6 sm:p-8 group hover:border-primary/20 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 relative overflow-hidden">
+                    <div className="glass-card relative overflow-hidden border border-black/5 bg-white p-5 sm:p-8 group transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-primary/10" />
                       
                       {/* Time Badge */}

@@ -84,17 +84,17 @@ export default function Highlights() {
     <section
       id="highlights"
       ref={sectionRef}
-      className="relative py-24 lg:py-32 gradient-alt"
+      className="relative py-20 sm:py-24 lg:py-32 gradient-alt"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 sm:gap-12 lg:grid-cols-12 lg:gap-16">
           {/* Left Column — Sticky Heading */}
           <div
             ref={leftRef}
             className="lg:col-span-4 lg:sticky lg:top-32 lg:self-start opacity-0"
           >
-            <span className="section-label text-primary block mb-6">What to Expect</span>
-            <h2 className="font-['Syne'] text-4xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-6">
+            <span className="section-label text-primary block mb-4 sm:mb-6">What to Expect</span>
+            <h2 className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-5 sm:mb-6">
               An Inspiring Day of Growth &amp; Connection
             </h2>
             <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
@@ -107,15 +107,15 @@ export default function Highlights() {
           {/* Right Column — Highlight Cards */}
           <div
             ref={cardsRef}
-            className="lg:col-span-8 space-y-6"
+            className="lg:col-span-8 space-y-4 sm:space-y-6"
           >
             {highlights.map((item, i) => (
               <div
                 key={i}
-                className="glass-card bg-white p-6 sm:p-8 flex items-start gap-5 sm:gap-6 group cursor-default transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] relative overflow-hidden border border-black/5"
+                className="glass-card relative overflow-hidden border border-black/5 bg-white p-5 sm:p-8 flex flex-col items-start gap-4 sm:flex-row sm:gap-6 group cursor-default transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-primary/10" />
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 backdrop-blur-md relative z-10">
+                <div className="relative z-10 h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center flex-shrink-0 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 sm:h-16 sm:w-16">
                   <item.icon size={28} className="text-primary" />
                 </div>
                 <div className="relative z-10">

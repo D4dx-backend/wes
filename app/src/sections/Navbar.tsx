@@ -59,14 +59,14 @@ export default function Navbar() {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[72px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-[72px] gap-4">
             {/* Logo */}
             <button
               onClick={() => scrollToSection('hero')}
-              className="transition-all hover:opacity-80"
+              className="transition-all hover:opacity-80 shrink-0"
             >
-              <img src="/Wes.png" alt="WES" className="h-10 md:h-12 object-contain" />
+              <img src="/Wes.png" alt="WES" className="h-9 sm:h-10 md:h-12 object-contain" />
             </button>
 
             {/* Desktop Nav */}
@@ -111,21 +111,21 @@ export default function Navbar() {
       {mobileOpen && (
         <div
           ref={mobileMenuRef}
-          className="fixed inset-0 z-40 bg-white flex flex-col items-center justify-center"
+          className="fixed inset-0 z-40 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center px-6 py-24"
         >
-          <div ref={mobileLinksRef} className="flex flex-col items-center gap-8">
+          <div ref={mobileLinksRef} className="flex w-full max-w-sm flex-col items-center gap-6 text-center">
             {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="font-['Outfit'] text-xl font-medium uppercase tracking-[0.1em] text-foreground/80 hover:text-foreground transition-colors"
+                className="w-full rounded-2xl border border-black/5 bg-white px-5 py-4 font-['Outfit'] text-lg font-medium uppercase tracking-[0.1em] text-foreground/80 shadow-sm transition-colors hover:text-foreground"
               >
                 {link.label}
               </button>
             ))}
             <RegistrationForm
               trigger={
-                <button className="pill-button pill-button-primary flex items-center gap-2 mt-4 border border-black/10 text-foreground bg-white hover:bg-gray-50">
+                <button className="pill-button pill-button-primary mt-2 flex w-full items-center justify-center gap-2 border border-black/10 text-foreground bg-white hover:bg-gray-50">
                   Register Now
                   <ArrowRight size={16} />
                 </button>
