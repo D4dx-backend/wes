@@ -219,7 +219,7 @@ export default function Hero() {
           ref={subtitleRef}
           className="mx-auto mb-7 max-w-[16rem] px-1 text-[0.95rem] font-light italic text-foreground/70 opacity-0 sm:mb-10 sm:max-w-xl sm:px-0 sm:text-xl"
         >
-          Celebrating Innovation, Leadership &amp; Empowerment
+          Empowering Women Entrepreneurs
         </p>
 
         {/* Date Banner */}
@@ -237,6 +237,8 @@ export default function Hero() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2 text-center text-xs font-medium text-foreground sm:text-base">
             <span>Saturday</span>
+            <span className="text-primary">&#9670;</span>
+            <span>10 AM</span>
             <span className="text-primary">&#9670;</span>
             <span>Kozhikode</span>
           </div>

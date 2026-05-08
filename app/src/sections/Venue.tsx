@@ -73,7 +73,7 @@ export default function Venue() {
             className="relative h-[280px] w-full sm:h-[360px] lg:h-auto"
           >
             <iframe 
-              src="https://maps.google.com/maps?q=Manuelsons+Malabar+Palace,+Kozhikode&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+              src="https://maps.google.com/maps?q=11.2690035,75.7898538&z=17&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
               height="100%" 
               frameBorder="0" 
@@ -95,18 +95,18 @@ export default function Venue() {
           </span>
 
           <h2 className="venue-reveal font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-3 sm:mb-4 opacity-0">
-            Manuelsons Malabar Palace
+            KPM TRIPENTA HOTEL
           </h2>
 
           <p className="venue-reveal font-['Outfit'] text-base sm:text-xl font-light text-foreground/60 mb-5 sm:mb-6 opacity-0 uppercase tracking-[0.2em] sm:tracking-widest">
-            Elegance Meets Inspiration
+            Kozhikode, Kerala
           </p>
 
           <p className="venue-reveal text-sm sm:text-base text-foreground/70 leading-relaxed mb-7 sm:mb-8 opacity-0">
-            Located in the heart of Kozhikode, Manuelsons Malabar Palace offers a 
-            refined and sophisticated setting for our summit. The venue&apos;s elegant 
-            architecture and warm ambiance create the perfect environment for visionary 
-            women to connect, exchange ideas, and grow together.
+            Located in the heart of Kozhikode, KPM TRIPENTA HOTEL offers a refined and
+            sophisticated setting for our summit. The venue&apos;s warm ambiance and premium
+            facilities create the perfect environment for visionary women to connect,
+            exchange ideas, and grow together.
           </p>
 
           {/* Venue Features */}
@@ -128,7 +128,7 @@ export default function Venue() {
 
           {/* Get Directions Button */}
           <a
-            href="https://maps.google.com/?q=Kozhikode+Kerala"
+            href="https://www.google.com/maps/place/KPM+TRIPENTA+HOTEL/@11.2690035,75.7872789,17z/data=!3m1!4b1!4m9!3m8!1s0x3ba659f860e349d3:0xada70f570af9dcae!5m2!4m1!1i2!8m2!3d11.2690035!4d75.7898538!16s%2Fg%2F11h3bt49hz"
             target="_blank"
             rel="noopener noreferrer"
             className="venue-reveal pill-button flex items-center gap-2 border border-black/10 text-foreground bg-white hover:bg-gray-50 shadow-sm inline-flex w-fit opacity-0"
