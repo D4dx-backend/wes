@@ -9,6 +9,7 @@ import About from '../sections/About';
 import Highlights from '../sections/Highlights';
 import Schedule from '../sections/Schedule';
 import Venue from '../sections/Venue';
+import RegistrationCTA from '../sections/RegistrationCTA';
 import Footer from '../sections/Footer';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -44,6 +45,7 @@ export default function Home() {
         <Highlights />
         <Schedule />
         <Venue />
+        <RegistrationCTA />
       </main>
       <Footer />
     </div>

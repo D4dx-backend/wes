@@ -11,11 +11,26 @@ type Registration = {
   whatsappNumber?: string;
   email?: string;
   district?: string;
-  gpay?: string;
+  paymentScreenshot?: string;
+  paymentVerified?: boolean;
+  entryPassGenerated?: boolean;
+  entryPassId?: string;
+  entryPassUrl?: string;
+  entryPassSentAt?: string;
   ventureName?: string;
   industry?: string;
   businessStage?: string;
   businessScale?: string;
+  createdAt?: string;
+};
+
+type PaymentQRItem = {
+  _id: string;
+  qrImage: string;
+  upiId: string;
+  amount: number;
+  label?: string;
+  isActive: boolean;
   createdAt?: string;
 };
 
@@ -50,6 +65,16 @@ type Filters = {
 
 type Toast = { id: number; message: string; kind: 'success' | 'error' };
 
+type ConfirmTone = 'default' | 'danger';
+
+type ConfirmDialogState = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  tone?: ConfirmTone;
+  onConfirm: () => void | Promise<void>;
+};
+
 function formatDate(s?: string, full = false) {
   if (!s) return '—';
   const d = new Date(s);
@@ -59,16 +84,16 @@ function formatDate(s?: string, full = false) {
 
 async function apiRequest(
   path: string,
-  opts: { method?: string; body?: unknown; token?: string | null; raw?: boolean } = {}
+  opts: { method?: string; body?: unknown; token?: string | null; raw?: boolean; formData?: FormData } = {}
 ): Promise<Response> {
   if (!API_URL) throw new Error('Server URL not configured');
   const headers: Record<string, string> = {};
-  if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
+  if (opts.body !== undefined && !opts.formData) headers['Content-Type'] = 'application/json';
   if (opts.token) headers['Authorization'] = `Bearer ${opts.token}`;
   const res = await fetch(`${API_URL}${path}`, {
     method: opts.method || 'GET',
     headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    body: opts.formData ? opts.formData : opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
   return res;
 }
@@ -237,10 +262,12 @@ function Dashboard({
   onLogout: () => void;
   onToast: (message: string, kind?: 'success' | 'error') => void;
 }) {
+  const [activeTab, setActiveTab] = useState<'registrations' | 'payment-qr'>('registrations');
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [page, setPage] = useState(1);
+  const [filtersBarVersion, setFiltersBarVersion] = useState(0);
   const [limit, setLimit] = useState(20);
 
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -255,6 +282,7 @@ function Dashboard({
 
   const [detailId, setDetailId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Registration | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
 
   const handleAuthError = useCallback(
     (err: unknown) => {
@@ -337,7 +365,7 @@ function Dashboard({
 
   const refreshAfterMutation = useCallback(async () => {
     try {
-      const [s, l] = await Promise.all([
+      const requests: Promise<unknown>[] = [
         apiJson<StatsResponse>('/api/admin/registrations/stats', { token }),
         apiJson<ListResponse>(
           `/api/admin/registrations?${new URLSearchParams({
@@ -351,13 +379,27 @@ function Dashboard({
           }).toString()}`,
           { token }
         ),
-      ]);
+      ];
+
+      if (detailId) {
+        requests.push(apiJson<Registration>(`/api/admin/registrations/${detailId}`, { token }));
+      }
+
+      const [s, l, nextDetail] = await Promise.all(requests) as [
+        StatsResponse,
+        ListResponse,
+        Registration | undefined,
+      ];
+
       setStats(s);
       setList(l);
+      if (detailId) {
+        setDetail(nextDetail ?? null);
+      }
     } catch (err) {
       if (!handleAuthError(err)) onToast((err as Error).message, 'error');
     }
-  }, [token, page, limit, sortBy, sortDir, filters, handleAuthError, onToast]);
+  }, [token, page, limit, sortBy, sortDir, filters, detailId, handleAuthError, onToast]);
 
   // open detail
   useEffect(() => {
@@ -394,26 +436,75 @@ function Dashboard({
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
+    setFiltersBarVersion((current) => current + 1);
     setSortBy('createdAt');
     setSortDir('desc');
     setLimit(20);
     setPage(1);
   };
 
-  const onDelete = async () => {
+  const deleteRegistration = async () => {
     if (!detail) return;
-    if (!window.confirm(`Delete registration for ${detail.fullName}? This cannot be undone.`)) {
-      return;
-    }
+    const deletedId = detail._id;
     try {
-      await apiJson(`/api/admin/registrations/${detail._id}`, { method: 'DELETE', token });
+      await apiJson(`/api/admin/registrations/${deletedId}`, { method: 'DELETE', token });
       onToast('Registration deleted', 'success');
       setDetailId(null);
-      await refreshAfterMutation();
+      setDetail(null);
+      setList((prev) =>
+        prev
+          ? { ...prev, items: prev.items.filter((r) => r._id !== deletedId), total: prev.total - 1 }
+          : prev
+      );
+      // Refresh stats and list from server (skip detail fetch since it was deleted)
+      try {
+        const [s, l] = await Promise.all([
+          apiJson<StatsResponse>('/api/admin/registrations/stats', { token }),
+          apiJson<ListResponse>(
+            `/api/admin/registrations?${new URLSearchParams({
+              page: String(page),
+              limit: String(limit),
+              sortBy,
+              sortDir,
+              ...Object.fromEntries(Object.entries(filters).filter(([, v]) => Boolean(v))),
+            }).toString()}`,
+            { token }
+          ),
+        ]);
+        setStats(s);
+        setList(l);
+      } catch (refreshErr) {
+        if (!handleAuthError(refreshErr)) onToast((refreshErr as Error).message, 'error');
+      }
     } catch (err) {
       if (!handleAuthError(err)) onToast((err as Error).message, 'error');
     }
   };
+
+  const requestDelete = useCallback(() => {
+    if (!detail) return;
+    setConfirmDialog({
+      title: 'Delete Registration',
+      description: `Delete registration for ${detail.fullName || 'this attendee'}? This action cannot be undone.`,
+      confirmLabel: 'Delete Registration',
+      tone: 'danger',
+      onConfirm: async () => {
+        await deleteRegistration();
+      },
+    });
+  }, [detail]);
+
+  const requestLogout = useCallback(() => {
+    setConfirmDialog({
+      title: 'Log Out',
+      description: 'End the current admin session now? You will need to sign in again to continue managing registrations.',
+      confirmLabel: 'Log Out',
+      tone: 'default',
+      onConfirm: () => {
+        onLogout();
+      },
+    });
+  }, [onLogout]);
 
   const onExport = async () => {
     try {
@@ -451,60 +542,104 @@ function Dashboard({
             <button onClick={onExport} className="pill pill-outline text-sm hidden md:inline-flex">
               Export CSV
             </button>
-            <button onClick={onLogout} className="pill pill-outline text-sm">
+            <button onClick={requestLogout} className="pill pill-outline text-sm">
               Logout
             </button>
           </div>
         </div>
+        <div className="max-w-7xl mx-auto px-6 flex gap-1">
+          <button
+            onClick={() => setActiveTab('registrations')}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === 'registrations'
+                ? 'border-white text-white'
+                : 'border-transparent text-white/50 hover:text-white/70'
+            }`}
+          >
+            Registrations
+          </button>
+          <button
+            onClick={() => setActiveTab('payment-qr')}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === 'payment-qr'
+                ? 'border-white text-white'
+                : 'border-transparent text-white/50 hover:text-white/70'
+            }`}
+          >
+            Payment QR
+          </button>
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        <StatsGrid stats={stats} />
+        {activeTab === 'registrations' ? (
+          <>
+            <StatsGrid stats={stats} />
 
-        <FiltersBar
-          filters={filters}
-          onFilterChange={setFilter}
-          options={options}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          onSortByChange={(v) => {
-            setSortBy(v);
-            setPage(1);
-          }}
-          onSortDirChange={(v) => {
-            setSortDir(v);
-            setPage(1);
-          }}
-          limit={limit}
-          onLimitChange={(v) => {
-            setLimit(v);
-            setPage(1);
-          }}
-          resultCount={list?.total ?? null}
-          onReset={resetFilters}
-        />
+            <FiltersBar
+              key={filtersBarVersion}
+              filters={filters}
+              onFilterChange={setFilter}
+              options={options}
+              sortBy={sortBy}
+              sortDir={sortDir}
+              onSortByChange={(v) => {
+                setSortBy(v);
+                setPage(1);
+              }}
+              onSortDirChange={(v) => {
+                setSortDir(v);
+                setPage(1);
+              }}
+              limit={limit}
+              onLimitChange={(v) => {
+                setLimit(v);
+                setPage(1);
+              }}
+              resultCount={list?.total ?? null}
+              onReset={resetFilters}
+            />
 
-        <DataTable
-          items={list?.items ?? []}
-          loading={listLoading}
-          error={listError}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          onSort={onColumnSort}
-          onView={(id) => setDetailId(id)}
-          page={list?.page ?? page}
-          pages={totalPages}
-          total={list?.total ?? 0}
-          onPrev={() => setPage((p) => Math.max(1, p - 1))}
-          onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
-        />
+            <DataTable
+              items={list?.items ?? []}
+              loading={listLoading}
+              error={listError}
+              sortBy={sortBy}
+              sortDir={sortDir}
+              onSort={onColumnSort}
+              onView={(id) => setDetailId(id)}
+              page={list?.page ?? page}
+              pages={totalPages}
+              total={list?.total ?? 0}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            />
+          </>
+        ) : (
+          <PaymentQRManager token={token} onToast={onToast} onLogout={onLogout} />
+        )}
       </main>
 
       {detailId && (
         <DetailModal
           detail={detail}
           onClose={() => setDetailId(null)}
-          onDelete={onDelete}
+          onDelete={requestDelete}
+          token={token}
+          onToast={onToast}
+          onRefresh={refreshAfterMutation}
+          onLogout={onLogout}
+        />
+      )}
+
+      {confirmDialog && (
+        <ConfirmModal
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          confirmLabel={confirmDialog.confirmLabel}
+          tone={confirmDialog.tone}
+          onConfirm={confirmDialog.onConfirm}
+          onClose={() => setConfirmDialog(null)}
         />
       )}
     </section>
@@ -573,20 +708,20 @@ function FiltersBar({
   const [search, setSearch] = useState(filters.search);
   const [district, setDistrict] = useState(filters.district);
 
-  // sync from outside (e.g. on reset)
-  useEffect(() => setSearch(filters.search), [filters.search]);
-  useEffect(() => setDistrict(filters.district), [filters.district]);
-
   useEffect(() => {
     const t = window.setTimeout(() => {
-      if (search !== filters.search) onFilterChange('search', search);
+      if (search !== filters.search) {
+        onFilterChange('search', search);
+      }
     }, 250);
     return () => window.clearTimeout(t);
   }, [search, filters.search, onFilterChange]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
-      if (district !== filters.district) onFilterChange('district', district);
+      if (district !== filters.district) {
+        onFilterChange('district', district);
+      }
     }, 250);
     return () => window.clearTimeout(t);
   }, [district, filters.district, onFilterChange]);
@@ -759,10 +894,10 @@ function DataTable({
       { sort: 'age', label: 'Age' },
       { label: 'Contact' },
       { sort: 'district', label: 'District' },
+      { label: 'Payment' },
+      { label: 'Status' },
       { label: 'Venture' },
       { sort: 'industry', label: 'Industry' },
-      { sort: 'businessStage', label: 'Stage' },
-      { sort: 'businessScale', label: 'Scale' },
       { sort: 'createdAt', label: 'Submitted' },
       { label: '' },
     ],
@@ -778,7 +913,7 @@ function DataTable({
   return (
     <div className="glass overflow-hidden">
       <div className="scroll-x">
-        <table className="data">
+        <table className="data admin-data-table">
           <thead>
             <tr>
               {headers.map((h, i) => (
@@ -816,29 +951,62 @@ function DataTable({
             ) : (
               items.map((it) => (
                 <tr key={it._id}>
-                  <td className="font-medium">{it.fullName || ''}</td>
+                  <td>
+                    <div className="admin-cell-name">{it.fullName || '—'}</div>
+                  </td>
                   <td>{it.age ?? ''}</td>
                   <td>
-                    <div>{it.email || ''}</div>
-                    <div className="text-white/50 text-xs mt-0.5">{it.whatsappNumber || ''}</div>
-                  </td>
-                  <td>{it.district || ''}</td>
-                  <td>
-                    <div className="max-w-[200px] truncate">{it.ventureName || ''}</div>
+                    <div className="admin-cell-contact">{it.email || '—'}</div>
+                    <div className="admin-cell-subtle">{it.whatsappNumber || '—'}</div>
                   </td>
                   <td>
-                    <span className="badge">{it.industry || ''}</span>
+                    <div className="admin-cell-compact">{it.district || '—'}</div>
                   </td>
                   <td>
-                    <span className="badge">{it.businessStage || ''}</span>
+                    {it.paymentScreenshot ? (
+                      it.paymentScreenshot.toLowerCase().endsWith('.pdf') ? (
+                        <a
+                          href={it.paymentScreenshot}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 text-xs underline"
+                        >
+                          PDF
+                        </a>
+                      ) : (
+                        <a href={it.paymentScreenshot} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={it.paymentScreenshot}
+                            alt="Payment"
+                            className="w-10 h-10 rounded object-cover border border-white/10 hover:opacity-80 transition"
+                          />
+                        </a>
+                      )
+                    ) : (
+                      <span className="text-white/30 text-xs">—</span>
+                    )}
                   </td>
                   <td>
-                    <span className="badge">{it.businessScale || ''}</span>
+                    {it.entryPassSentAt ? (
+                      <span className="badge bg-blue-500/20 text-blue-300 border-blue-500/30">Sent</span>
+                    ) : it.entryPassGenerated ? (
+                      <span className="badge bg-purple-500/20 text-purple-300 border-purple-500/30">Pass Ready</span>
+                    ) : it.paymentVerified ? (
+                      <span className="badge bg-green-500/20 text-green-300 border-green-500/30">Verified</span>
+                    ) : (
+                      <span className="badge bg-yellow-500/20 text-yellow-300 border-yellow-500/30">Pending</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="admin-cell-venture">{it.ventureName || '—'}</div>
+                  </td>
+                  <td>
+                    <span className="badge admin-badge-fit">{it.industry || '—'}</span>
                   </td>
                   <td className="text-white/70 text-xs">{formatDate(it.createdAt)}</td>
                   <td>
                     <button
-                      className="pill pill-outline text-xs"
+                      className="pill pill-outline admin-table-action text-xs"
                       onClick={() => onView(it._id)}
                     >
                       View
@@ -873,18 +1041,48 @@ function DetailModal({
   detail,
   onClose,
   onDelete,
+  token,
+  onToast,
+  onRefresh,
+  onLogout,
 }: {
   detail: Registration | null;
   onClose: () => void;
   onDelete: () => void;
+  token: string;
+  onToast: (message: string, kind?: 'success' | 'error') => void;
+  onRefresh: () => Promise<void>;
+  onLogout: () => void;
 }) {
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const handleAction = async (action: string, method: string, path: string) => {
+    if (!detail) return;
+    setActionLoading(action);
+    try {
+      await apiJson(path, { method, token });
+      onToast(
+        action === 'verify' ? 'Payment verified' :
+        action === 'generate' ? 'Entry pass generated' :
+        'Entry pass sent via WhatsApp',
+        'success'
+      );
+      await onRefresh();
+    } catch (err) {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const fields: [string, unknown][] = detail
     ? [
         ['Age', detail.age],
         ['WhatsApp', detail.whatsappNumber],
         ['Email', detail.email],
         ['District', detail.district],
-        ['GPay', detail.gpay],
         ['Venture / Business', detail.ventureName],
         ['Industry / Sector', detail.industry],
         ['Business Stage', detail.businessStage],
@@ -893,6 +1091,16 @@ function DetailModal({
       ]
     : [];
 
+  const workflowStep = !detail
+    ? null
+    : detail.entryPassSentAt
+      ? 'sent'
+      : detail.entryPassGenerated
+        ? 'generated'
+        : detail.paymentVerified
+          ? 'verified'
+          : 'pending';
+
   return (
     <div
       className="modal-backdrop"
@@ -900,11 +1108,11 @@ function DetailModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="glass-strong max-w-2xl w-[92%] max-h-[88vh] overflow-y-auto p-7">
+      <div className="glass-strong admin-scrollbar-hide max-w-[58rem] w-[92%] max-h-[88vh] overflow-y-auto p-5 md:p-6">
         <div className="flex items-start justify-between mb-5">
           <div>
             <div className="text-xs uppercase tracking-widest text-white/50">Registration</div>
-            <div className="admin-display text-2xl font-bold">
+            <div className="admin-display text-xl md:text-2xl font-bold leading-tight pr-4">
               {detail?.fullName || (detail ? '—' : '')}
             </div>
           </div>
@@ -921,16 +1129,127 @@ function DetailModal({
             <span className="spinner" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            {fields.map(([label, val]) => (
-              <div key={label}>
-                <div className="text-xs uppercase tracking-wider text-white/50">{label}</div>
-                <div className="mt-1 break-words">
-                  {val === null || val === undefined || val === '' ? '—' : String(val)}
+          <>
+            <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-white/45">Workflow</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className={`badge ${workflowStep === 'pending' ? 'bg-yellow-500/20 text-yellow-200 border-yellow-500/30' : ''}`}>
+                      1. Verify Payment
+                    </span>
+                    <span className={`badge ${workflowStep === 'verified' || workflowStep === 'generated' || workflowStep === 'sent' ? 'bg-purple-500/20 text-purple-200 border-purple-500/30' : ''}`}>
+                      2. Generate Pass
+                    </span>
+                    <span className={`badge ${workflowStep === 'sent' ? 'bg-blue-500/20 text-blue-200 border-blue-500/30' : ''}`}>
+                      3. Send Ticket
+                    </span>
+                  </div>
+                </div>
+                <div className="text-sm text-white/60 max-w-xs">
+                  {workflowStep === 'pending' && 'Verify the payment first to unlock pass generation.'}
+                  {workflowStep === 'verified' && 'Payment is verified. You can generate the attendee pass now.'}
+                  {workflowStep === 'generated' && 'Pass is ready. Send it directly through WhatsApp from here.'}
+                  {workflowStep === 'sent' && 'Ticket has been sent. You can resend it if the attendee requests another copy.'}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {fields.map(([label, val]) => (
+                    <div key={label} className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                      <div className="text-xs uppercase tracking-wider text-white/50">{label}</div>
+                      <div className="mt-1 break-words text-white/90">
+                        {val === null || val === undefined || val === '' ? '—' : String(val)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {detail.paymentScreenshot && (
+                  <div className="mt-5">
+                    <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Payment Screenshot</div>
+                    {detail.paymentScreenshot.toLowerCase().endsWith('.pdf') ? (
+                      <a
+                        href={detail.paymentScreenshot}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm underline"
+                      >
+                        View PDF
+                      </a>
+                    ) : (
+                      <a href={detail.paymentScreenshot} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={detail.paymentScreenshot}
+                          alt="Payment screenshot"
+                          className="max-w-full md:max-w-sm rounded-lg border border-white/10 hover:opacity-90 transition"
+                        />
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                <div className="text-xs uppercase tracking-wider text-white/50 mb-3">Actions</div>
+                <div className="flex flex-col gap-2">
+                  {!detail.paymentVerified && (
+                    <button
+                      onClick={() => handleAction('verify', 'PATCH', `/api/admin/registrations/${detail._id}/verify-payment`)}
+                      disabled={actionLoading === 'verify'}
+                      className="pill text-sm bg-green-600/80 text-white hover:bg-green-600 w-full"
+                    >
+                      {actionLoading === 'verify' ? <span className="spinner" /> : 'Verify Payment'}
+                    </button>
+                  )}
+                  {detail.paymentVerified && !detail.entryPassGenerated && (
+                    <button
+                      onClick={() => handleAction('generate', 'POST', `/api/admin/registrations/${detail._id}/generate-pass`)}
+                      disabled={actionLoading === 'generate'}
+                      className="pill text-sm bg-purple-600/80 text-white hover:bg-purple-600 w-full"
+                    >
+                      {actionLoading === 'generate' ? <span className="spinner" /> : 'Generate Pass'}
+                    </button>
+                  )}
+                  {detail.entryPassGenerated && (
+                    <button
+                      onClick={() => handleAction('send', 'POST', `/api/admin/registrations/${detail._id}/send-pass`)}
+                      disabled={actionLoading === 'send'}
+                      className="pill text-sm bg-blue-600/80 text-white hover:bg-blue-600 w-full"
+                    >
+                      {actionLoading === 'send' ? <span className="spinner" /> : detail.entryPassSentAt ? 'Resend Ticket' : 'Send Ticket'}
+                    </button>
+                  )}
+                </div>
+
+                {detail.entryPassUrl && (
+                  <div className="mt-4 border-t border-white/10 pt-4">
+                    <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Entry Pass</div>
+                    <a href={detail.entryPassUrl} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={detail.entryPassUrl}
+                        alt="Entry pass"
+                        className="w-full rounded-lg border border-white/10 hover:opacity-90 transition"
+                      />
+                    </a>
+                    {detail.entryPassId && (
+                      <div className="mt-2 text-xs text-white/50">
+                        Pass ID: <span className="font-mono text-white/70">{detail.entryPassId}</span>
+                      </div>
+                    )}
+                    {detail.entryPassSentAt && (
+                      <div className="mt-1 text-xs text-white/50">
+                        Sent: {formatDate(detail.entryPassSentAt, true)}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         <div className="mt-6 flex items-center justify-end gap-3">
@@ -942,6 +1261,372 @@ function DetailModal({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ConfirmModal({
+  title,
+  description,
+  confirmLabel,
+  tone = 'default',
+  onConfirm,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  tone?: ConfirmTone;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+}) {
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !submitting) onClose();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose, submitting]);
+
+  const handleConfirm = async () => {
+    setSubmitting(true);
+    try {
+      await onConfirm();
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const confirmClass =
+    tone === 'danger'
+      ? 'pill pill-danger-solid text-sm'
+      : 'pill pill-primary text-sm';
+
+  return (
+    <div
+      className="modal-backdrop"
+      onClick={(event) => {
+        if (event.target === event.currentTarget && !submitting) onClose();
+      }}
+    >
+      <div className="glass-strong w-[min(92vw,32rem)] p-7 md:p-8">
+        <div className="mb-4 inline-flex rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
+          Confirmation
+        </div>
+        <h3 className="admin-display text-2xl font-bold leading-tight">{title}</h3>
+        <p className="mt-3 text-sm leading-6 text-white/68">{description}</p>
+        <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="pill pill-outline text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={submitting}
+            className={confirmClass}
+          >
+            {submitting ? <span className="spinner" /> : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------- PAYMENT QR MANAGER ----------------- */
+
+function PaymentQRManager({
+  token,
+  onToast,
+  onLogout,
+}: {
+  token: string;
+  onToast: (message: string, kind?: 'success' | 'error') => void;
+  onLogout: () => void;
+}) {
+  const [items, setItems] = useState<PaymentQRItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [upiId, setUpiId] = useState('');
+  const [amount, setAmount] = useState('');
+  const [label, setLabel] = useState('');
+  const [qrFile, setQrFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const loadItems = useCallback(async () => {
+    try {
+      const data = await apiJson<{ items: PaymentQRItem[] }>('/api/admin/payment-qr', { token });
+      setItems(data.items);
+    } catch (err) {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [token, onToast, onLogout]);
+
+  useEffect(() => { loadItems(); }, [loadItems]);
+
+  const onUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!qrFile || !upiId.trim() || !amount.trim()) {
+      onToast('Please fill all fields and select a QR image', 'error');
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('qrImage', qrFile);
+      fd.append('upiId', upiId.trim());
+      fd.append('amount', amount.trim());
+      fd.append('label', label.trim());
+
+      const res = await apiRequest('/api/admin/payment-qr', {
+        method: 'POST',
+        token,
+        formData: fd,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { onLogout(); return; }
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      onToast('Payment QR added', 'success');
+      setUpiId('');
+      setAmount('');
+      setLabel('');
+      setQrFile(null);
+      if (fileRef.current) fileRef.current.value = '';
+      await loadItems();
+    } catch (err) {
+      onToast((err as Error).message, 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onActivate = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await apiJson(`/api/admin/payment-qr/${id}/activate`, { method: 'PATCH', token });
+      onToast('QR activated', 'success');
+      await loadItems();
+    } catch (err) {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const onDeactivate = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await apiJson(`/api/admin/payment-qr/${id}/deactivate`, { method: 'PATCH', token });
+      onToast('QR deactivated', 'success');
+      await loadItems();
+    } catch (err) {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const onDeleteQR = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await apiJson(`/api/admin/payment-qr/${id}`, { method: 'DELETE', token });
+      onToast('QR deleted', 'success');
+      await loadItems();
+    } catch (err) {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const requestDeleteQR = useCallback((item: PaymentQRItem) => {
+    setConfirmDialog({
+      title: 'Delete Payment QR',
+      description: `Remove the payment QR for ${item.upiId}? Attendees will no longer be able to use this configuration once it is deleted.`,
+      confirmLabel: 'Delete QR',
+      tone: 'danger',
+      onConfirm: async () => {
+        await onDeleteQR(item._id);
+      },
+    });
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      {/* Upload Form */}
+      <div className="glass p-6">
+        <h3 className="admin-display text-lg font-bold mb-4">Add Payment QR</h3>
+        <form onSubmit={onUpload} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+              QR Image *
+            </label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => setQrFile(e.target.files?.[0] || null)}
+              className="input text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-white/70 file:text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+              UPI ID *
+            </label>
+            <input
+              type="text"
+              className="input"
+              placeholder="name@upi"
+              value={upiId}
+              onChange={(e) => setUpiId(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+              Amount (₹) *
+            </label>
+            <input
+              type="number"
+              className="input"
+              placeholder="500"
+              min={1}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-1.5">
+              Label (optional)
+            </label>
+            <input
+              type="text"
+              className="input"
+              placeholder="e.g. Primary UPI"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <button type="submit" className="pill pill-primary text-sm" disabled={uploading}>
+              {uploading ? <span className="spinner" /> : 'Add QR'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* QR List */}
+      <div className="glass p-6">
+        <h3 className="admin-display text-lg font-bold mb-4">Payment QR Configs</h3>
+        <p className="text-xs text-white/40 mb-4">Only one QR can be active at a time. The active QR is shown on the registration form.</p>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <span className="spinner" />
+          </div>
+        ) : items.length === 0 ? (
+          <div className="text-center py-8 text-white/50 text-sm">
+            No payment QR configs yet. Add one above.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((item) => (
+              <div
+                key={item._id}
+                className={`rounded-xl border p-4 ${
+                  item.isActive
+                    ? 'border-green-500/40 bg-green-500/5'
+                    : 'border-white/10 bg-white/5'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <img
+                    src={item.qrImage}
+                    alt="QR"
+                    className="w-20 h-20 rounded-lg object-contain bg-white p-1"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      {item.isActive ? (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 border border-green-500/30">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/10 text-white/50 border border-white/10">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm font-mono text-white/80 truncate">{item.upiId}</div>
+                    <div className="text-sm text-white/60">₹{item.amount.toLocaleString('en-IN')}</div>
+                    {item.label && (
+                      <div className="text-xs text-white/40 mt-1">{item.label}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-3">
+                  {item.isActive ? (
+                    <button
+                      onClick={() => onDeactivate(item._id)}
+                      disabled={actionLoading === item._id}
+                      className="pill pill-outline text-xs"
+                    >
+                      {actionLoading === item._id ? <span className="spinner" /> : 'Deactivate'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onActivate(item._id)}
+                      disabled={actionLoading === item._id}
+                      className="pill text-xs bg-green-600/80 text-white hover:bg-green-600"
+                    >
+                      {actionLoading === item._id ? <span className="spinner" /> : 'Activate'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => requestDeleteQR(item)}
+                    disabled={actionLoading === item._id}
+                    className="pill pill-outline pill-danger text-xs"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {confirmDialog && (
+        <ConfirmModal
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          confirmLabel={confirmDialog.confirmLabel}
+          tone={confirmDialog.tone}
+          onConfirm={confirmDialog.onConfirm}
+          onClose={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   );
 }
