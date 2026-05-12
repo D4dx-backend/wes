@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin, Star, Award, Navigation } from 'lucide-react';
+import { Building2, Navigation, Sparkles, Users } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const features = [
-  { icon: Star, label: 'Elegant Banquet Hall' },
-  { icon: Award, label: 'Premium Hospitality' },
-  { icon: MapPin, label: 'Central Location' },
+  { icon: Building2, label: 'A comfortable premium venue for a full-day summit experience' },
+  { icon: Users, label: 'Networking-friendly spaces for conversations beyond the stage' },
+  { icon: Sparkles, label: 'A polished atmosphere aligned with the event’s modern visual identity' },
 ];
 
 export default function Venue() {
@@ -63,11 +63,10 @@ export default function Venue() {
     <section
       id="venue"
       ref={sectionRef}
-      className="relative bg-background"
+      className="relative py-6 sm:py-8"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-24">
-        <div className="grid min-h-[60vh] grid-cols-1 overflow-hidden rounded-[1.75rem] border border-black/5 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] lg:grid-cols-2">
-          {/* Left Column — Visual Map */}
+        <div className="grid min-h-[60vh] grid-cols-1 overflow-hidden rounded-[1.9rem] border border-white/12 bg-white/[0.06] shadow-[0_24px_70px_rgba(7,2,20,0.24)] backdrop-blur-xl lg:grid-cols-2">
           <div
             ref={leftRef}
             className="relative h-[280px] w-full sm:h-[360px] lg:h-auto"
@@ -85,58 +84,66 @@ export default function Venue() {
             ></iframe>
           </div>
 
-        {/* Right Column — Content */}
-        <div
-          ref={rightRef}
-          className="flex flex-col justify-center px-5 py-8 sm:px-10 sm:py-12 lg:px-16 lg:py-24"
-        >
-          <span className="venue-reveal section-label text-primary mb-4 sm:mb-6 opacity-0">
-            The Venue
-          </span>
-
-          <h2 className="venue-reveal font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-3 sm:mb-4 opacity-0">
-            KPM TRIPENTA HOTEL
-          </h2>
-
-          <p className="venue-reveal font-['Outfit'] text-base sm:text-xl font-light text-foreground/60 mb-5 sm:mb-6 opacity-0 uppercase tracking-[0.2em] sm:tracking-widest">
-            Kozhikode, Kerala
-          </p>
-
-          <p className="venue-reveal text-sm sm:text-base text-foreground/70 leading-relaxed mb-7 sm:mb-8 opacity-0">
-            Located in the heart of Kozhikode, KPM TRIPENTA HOTEL offers a refined and
-            sophisticated setting for our summit. The venue&apos;s warm ambiance and premium
-            facilities create the perfect environment for visionary women to connect,
-            exchange ideas, and grow together.
-          </p>
-
-          {/* Venue Features */}
-          <div className="venue-reveal space-y-3 sm:space-y-4 mb-8 sm:mb-10 opacity-0">
-            {features.map((feature, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 sm:gap-4 text-foreground/80"
-              >
-                <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/20 backdrop-blur-sm sm:h-12 sm:w-12">
-                  <feature.icon size={20} className="text-primary" />
-                </div>
-                <span className="text-sm sm:text-lg font-medium">
-                  {feature.label}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Get Directions Button */}
-          <a
-            href="https://www.google.com/maps/place/KPM+TRIPENTA+HOTEL/@11.2690035,75.7872789,17z/data=!3m1!4b1!4m9!3m8!1s0x3ba659f860e349d3:0xada70f570af9dcae!5m2!4m1!1i2!8m2!3d11.2690035!4d75.7898538!16s%2Fg%2F11h3bt49hz"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="venue-reveal pill-button flex items-center gap-2 border border-black/10 text-foreground bg-white hover:bg-gray-50 shadow-sm inline-flex w-fit opacity-0"
+          <div
+            ref={rightRef}
+            className="flex flex-col justify-center px-5 py-8 text-white sm:px-10 sm:py-12 lg:px-16 lg:py-24"
           >
-            <Navigation size={18} />
-            Get Directions
-          </a>
-        </div>
+            <span className="venue-reveal section-label text-primary mb-4 sm:mb-6 opacity-0">
+              Venue & Hosting
+            </span>
+
+            <h2 className="venue-reveal font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-white leading-[1.05] tracking-tight mb-3 sm:mb-4 opacity-0">
+              KPM TRIPENTA HOTEL
+            </h2>
+
+            <p className="venue-reveal font-['Outfit'] text-base sm:text-xl font-light text-white/62 mb-5 sm:mb-6 opacity-0 uppercase tracking-[0.2em] sm:tracking-widest">
+              Kozhikode, Kerala
+            </p>
+
+            <p className="venue-reveal text-sm sm:text-base text-white/74 leading-relaxed mb-7 sm:mb-8 opacity-0">
+              Set in the heart of Kozhikode, the venue offers a polished and practical setting for a
+              summit that blends formal sessions with organic networking. The programme is hosted by
+              Jamaat-e-Islami Hind Women&apos;s Wing Kerala as a platform for women to gather, reflect,
+              and move forward with renewed confidence.
+            </p>
+
+            <div className="venue-reveal space-y-3 sm:space-y-4 mb-8 sm:mb-10 opacity-0">
+              {features.map((feature, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 sm:gap-4 text-white/85"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/10 backdrop-blur-sm sm:h-12 sm:w-12">
+                    <feature.icon size={20} className="text-[#ffd0e8]" />
+                  </div>
+                  <span className="text-sm sm:text-lg font-medium">
+                    {feature.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="venue-reveal mb-6 grid gap-3 opacity-0 sm:grid-cols-2">
+              <div className="rounded-[22px] border border-white/12 bg-black/10 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/50">Organised by</p>
+                <p className="mt-2 text-sm leading-6 text-white/78">Jamaat-e-Islami Hind Women&apos;s Wing Kerala</p>
+              </div>
+              <div className="rounded-[22px] border border-white/12 bg-black/10 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/50">City energy</p>
+                <p className="mt-2 text-sm leading-6 text-white/78">A central Kozhikode location that keeps access simple for mobile-first attendees.</p>
+              </div>
+            </div>
+
+            <a
+              href="https://www.google.com/maps/place/KPM+TRIPENTA+HOTEL/@11.2690035,75.7872789,17z/data=!3m1!4b1!4m9!3m8!1s0x3ba659f860e349d3:0xada70f570af9dcae!5m2!4m1!1i2!8m2!3d11.2690035!4d75.7898538!16s%2Fg%2F11h3bt49hz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="venue-reveal pill-button inline-flex w-fit items-center gap-2 border border-white/14 bg-white/10 text-white hover:bg-white/15 opacity-0"
+            >
+              <Navigation size={18} />
+              Get Directions
+            </a>
+          </div>
         </div>
       </div>
     </section>

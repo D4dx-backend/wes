@@ -379,4 +379,164 @@ router.post('/registrations/:id/send-pass', async (req, res) => {
   }
 });
 
+/* ===================== CHECK-IN (QR SCANNING) ===================== */
+
+// Scan / check-in by passId
+router.post('/check-in/:passId', async (req, res) => {
+  try {
+    const passId = String(req.params.passId).trim().toUpperCase();
+    if (!passId) return res.status(400).json({ error: 'Pass ID is required' });
+
+    const doc = await Registration.findOne({ entryPassId: passId });
+    if (!doc) {
+      return res.status(404).json({ error: 'Invalid pass', passId });
+    }
+
+    if (doc.checkedIn) {
+      return res.status(409).json({
+        error: 'Already checked in',
+        passId,
+        fullName: doc.fullName,
+        checkedInAt: doc.checkedInAt,
+        checkedInBy: doc.checkedInBy,
+      });
+    }
+
+    doc.checkedIn = true;
+    doc.checkedInAt = new Date();
+    doc.checkedInBy = req.admin?.username || 'admin';
+    await doc.save();
+
+    res.json({
+      ok: true,
+      passId,
+      fullName: doc.fullName,
+      ventureName: doc.ventureName,
+      district: doc.district,
+      checkedInAt: doc.checkedInAt,
+    });
+  } catch (err) {
+    console.error('[admin] check-in error:', err);
+    res.status(500).json({ error: 'Check-in failed' });
+  }
+});
+
+// List checked-in attendees
+router.get('/check-ins', async (req, res) => {
+  try {
+    const {
+      search = '',
+      sortBy = 'checkedInAt',
+      sortDir = 'desc',
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    const query = { checkedIn: true };
+
+    if (search && String(search).trim().length > 0) {
+      const re = new RegExp(escapeRegex(String(search).trim()), 'i');
+      query.$or = [
+        { fullName: re },
+        { entryPassId: re },
+        { ventureName: re },
+        { district: re },
+      ];
+    }
+
+    const allowedSort = new Set(['checkedInAt', 'fullName', 'district', 'ventureName']);
+    const sortField = allowedSort.has(String(sortBy)) ? String(sortBy) : 'checkedInAt';
+    const sortDirection = String(sortDir).toLowerCase() === 'asc' ? 1 : -1;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [items, total] = await Promise.all([
+      Registration.find(query)
+        .select('fullName ventureName district entryPassId checkedInAt checkedInBy whatsappNumber')
+        .sort({ [sortField]: sortDirection })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Registration.countDocuments(query),
+    ]);
+
+    res.json({
+      items,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum) || 1,
+    });
+  } catch (err) {
+    console.error('[admin] check-ins list error:', err);
+    res.status(500).json({ error: 'Failed to load check-ins' });
+  }
+});
+
+// Check-in stats
+router.get('/check-ins/stats', async (_req, res) => {
+  try {
+    const [totalCheckedIn, totalWithPass] = await Promise.all([
+      Registration.countDocuments({ checkedIn: true }),
+      Registration.countDocuments({ entryPassGenerated: true }),
+    ]);
+
+    res.json({
+      totalCheckedIn,
+      totalWithPass,
+      percentage: totalWithPass > 0 ? Math.round((totalCheckedIn / totalWithPass) * 100) : 0,
+    });
+  } catch (err) {
+    console.error('[admin] check-in stats error:', err);
+    res.status(500).json({ error: 'Failed to load check-in stats' });
+  }
+});
+
+// Export checked-in attendees as CSV
+router.get('/check-ins/export', async (_req, res) => {
+  try {
+    const items = await Registration.find({ checkedIn: true })
+      .sort({ checkedInAt: -1 })
+      .lean();
+
+    const fields = [
+      ['checkedInAt', 'Checked In At'],
+      ['fullName', 'Full Name'],
+      ['whatsappNumber', 'WhatsApp'],
+      ['district', 'District'],
+      ['ventureName', 'Venture/Business'],
+      ['entryPassId', 'Pass ID'],
+      ['checkedInBy', 'Checked In By'],
+    ];
+
+    const escape = (val) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val).replace(/"/g, '""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    };
+
+    const header = fields.map(([, label]) => label).join(',');
+    const rows = items
+      .map((it) =>
+        fields
+          .map(([key]) => {
+            const v = it[key];
+            if (key === 'checkedInAt' && v) return new Date(v).toISOString();
+            return escape(v);
+          })
+          .join(',')
+      )
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="check-ins.csv"');
+    res.send(header + '\n' + rows);
+  } catch (err) {
+    console.error('[admin] check-ins export error:', err);
+    res.status(500).json({ error: 'Failed to export check-ins' });
+  }
+});
+
 module.exports = router;

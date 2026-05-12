@@ -64,7 +64,6 @@ export default function RegistrationCTA() {
       ref={sectionRef}
       className="relative overflow-hidden py-20 sm:py-24 lg:py-32 gradient-hero"
     >
-      {/* Decorative background shapes */}
       <img
         src="/shape-coral.png"
         alt=""
@@ -78,23 +77,24 @@ export default function RegistrationCTA() {
         style={{ filter: 'blur(25px)' }}
       />
 
-      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-[32px] border border-white/12 bg-white/[0.08] p-6 text-center shadow-[0_24px_70px_rgba(7,2,20,0.24)] backdrop-blur-xl sm:p-8 lg:p-10">
         <h2
           ref={headingRef}
-          className="font-['Syne'] text-3xl sm:text-5xl lg:text-[64px] font-bold text-foreground leading-[1.1] tracking-tight mb-4 sm:mb-6 opacity-0"
+          className="font-['Syne'] text-3xl sm:text-5xl lg:text-[64px] font-bold text-white leading-[1.05] tracking-tight mb-4 sm:mb-6 opacity-0"
         >
-          Secure Your Place Today
+          Make your place part of the room.
         </h2>
 
         <p
           ref={bodyRef}
-          className="mx-auto mb-8 max-w-xl text-sm leading-relaxed text-foreground/70 opacity-0 sm:mb-10 sm:text-lg"
+          className="mx-auto mb-8 max-w-2xl text-sm leading-relaxed text-white/76 opacity-0 sm:mb-10 sm:text-lg"
         >
-          Registration Fee: ₹1,000 per participant. Limited seats available. 
-          Confirm your participation and be part of this transformative experience.
+          Registration is limited to keep the experience intentional, comfortable, and high value.
+          Join a room filled with women who are serious about business growth, identity, leadership,
+          and meaningful collaboration.
         </p>
 
-        {/* Price Display */}
         <div
           ref={priceRef}
           className="mb-8 opacity-0 sm:mb-10"
@@ -102,21 +102,20 @@ export default function RegistrationCTA() {
           <span
             className="font-['Syne'] text-[52px] sm:text-[80px] font-bold tracking-tight"
             style={{
-              background: 'linear-gradient(90deg, #1A0033, #E91E63)',
+              background: 'linear-gradient(90deg, #ffffff, #ffd4ea, #ff8abb)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'drop-shadow(0 10px 24px rgba(233, 30, 99, 0.18))',
+              filter: 'drop-shadow(0 10px 24px rgba(255, 112, 190, 0.28))',
             }}
           >
             ₹1,000
           </span>
-          <span className="mt-2 block text-sm uppercase tracking-wider text-foreground/55">
+          <span className="mt-2 block text-sm uppercase tracking-wider text-white/55">
             per participant
           </span>
         </div>
 
-        {/* CTA Button */}
         <RegistrationForm
           trigger={
             <button
@@ -132,10 +131,11 @@ export default function RegistrationCTA() {
         {/* Event Info */}
         <p
           ref={infoRef}
-          className="mx-auto max-w-[20rem] text-sm text-foreground/60 opacity-0 sm:text-base"
+          className="mx-auto max-w-xl text-sm text-white/60 opacity-0 sm:text-base"
         >
-          Saturday, June 20, 2026 · KPM TRIPENTA HOTEL, Kozhikode
+          Saturday, June 20, 2026 · KPM TRIPENTA HOTEL, Kozhikode · Hosted by Jamaat-e-Islami Hind Women&apos;s Wing Kerala
         </p>
+        </div>
       </div>
     </section>
   );

@@ -243,7 +243,7 @@ export default function RegistrationForm({ trigger }: Props) {
         className="max-h-[92vh] max-w-[calc(100%-1rem)] overflow-hidden border-0 !bg-transparent p-0 sm:max-w-2xl"
       >
         <div
-          className="relative overflow-hidden rounded-[1.35rem] border border-black/5 bg-white shadow-[0_25px_80px_rgba(0,0,0,0.15)] sm:rounded-2xl"
+          className="light-surface-theme relative overflow-hidden rounded-[1.35rem] border border-black/5 bg-white shadow-[0_25px_80px_rgba(0,0,0,0.15)] sm:rounded-2xl"
         >
           {/* Close button */}
           <button

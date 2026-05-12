@@ -101,6 +101,17 @@ const registrationSchema = new mongoose.Schema(
       required: [true, 'Business Scale is required'],
       enum: BUSINESS_SCALE_OPTIONS,
     },
+    checkedIn: {
+      type: Boolean,
+      default: false,
+    },
+    checkedInAt: {
+      type: Date,
+    },
+    checkedInBy: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

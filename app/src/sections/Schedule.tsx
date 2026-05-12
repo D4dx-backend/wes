@@ -8,47 +8,47 @@ const scheduleItems = [
   {
     time: '09:00 AM',
     title: 'Registration & Welcome',
-    description: 'Check-in, receive your welcome kit, and enjoy networking over refreshments.',
+    description: 'Arrival, check-in, first conversations, and a warm opening to the summit atmosphere.',
   },
   {
     time: '10:00 AM',
     title: 'Inaugural Session',
-    description: 'Opening remarks by distinguished guests and introduction to the summit\'s vision of empowering women entrepreneurs.',
+    description: 'Opening reflections, the summit vision, and the tone for a day centred on women, enterprise, and impact.',
   },
   {
     time: '10:30 AM',
     title: 'Ethical & Value-Based Business',
-    description: 'Building businesses grounded in strong values — how ethics and principles drive sustainable growth.',
+    description: 'How principles, accountability, and values can strengthen business decisions and long-term growth.',
   },
   {
     time: '11:30 AM',
     title: 'Women Identity & Leadership',
-    description: 'Balancing personal identity and leadership roles — navigating the unique challenges women face in entrepreneurship.',
+    description: 'Conversations on self-belief, leadership presence, and building with clarity in different life stages.',
   },
   {
     time: '12:30 PM',
     title: 'Panel Discussion',
-    description: 'Inspiring insights from successful women entrepreneurs sharing their journeys, challenges, and triumphs.',
+    description: 'Real stories from women entrepreneurs sharing honest lessons, turning points, and practical wisdom.',
   },
   {
     time: '01:30 PM',
     title: 'Networking Lunch',
-    description: 'A curated lunch experience at KPM TRIPENTA HOTEL with continued networking and peer connections.',
+    description: 'A relaxed midpoint to build connections, continue discussions, and meet peers from across sectors.',
   },
   {
     time: '02:30 PM',
     title: 'Digital Marketing & Branding',
-    description: 'How to market and brand your business digitally — practical strategies to build your online presence.',
+    description: 'Sharper thinking on messaging, online presence, audience connection, and digital visibility.',
   },
   {
     time: '03:30 PM',
     title: 'Business Design Thinking',
-    description: 'Strategies for innovation and scaling — creative problem-solving approaches to grow your enterprise.',
+    description: 'Creative tools to refine offers, solve business problems, and build more intentional growth paths.',
   },
   {
     time: '04:30 PM',
     title: 'Special Consultation Desks',
-    description: 'One-on-one expert guidance on Business Growth, Startup Ecosystem, and Ethical Business practices.',
+    description: 'Focused guidance and extended conversations for participants who want more tailored direction.',
   },
 ];
 
@@ -126,34 +126,29 @@ export default function Schedule() {
     <section
       id="schedule"
       ref={sectionRef}
-      className="relative overflow-hidden bg-background py-20 sm:py-24 lg:py-32"
+      className="relative overflow-hidden py-20 sm:py-24 lg:py-32"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Label */}
         <span
           ref={labelRef}
           className="section-label text-primary block text-center mb-4 sm:mb-6 opacity-0"
         >
-          Event Schedule
+          Program Flow
         </span>
 
-        {/* Section Heading */}
         <h2
           ref={headingRef}
-          className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground text-center mb-12 sm:mb-16 opacity-0 leading-[1.1] tracking-tight"
+          className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-white text-center mb-12 sm:mb-16 opacity-0 leading-[1.05] tracking-tight"
         >
-          A Day Designed for <span className="text-primary">Impact</span>
+          A full-day journey built to keep energy, insight, and connection moving.
         </h2>
 
-        {/* Timeline */}
         <div ref={itemsRef} className="relative">
-          {/* Center Line */}
           <div
             ref={lineRef}
-            className="absolute left-4 top-0 bottom-0 w-[2px] origin-top bg-gradient-to-b from-primary via-primary/30 to-transparent lg:left-1/2 lg:-translate-x-px"
+            className="absolute left-4 top-0 bottom-0 w-[2px] origin-top bg-gradient-to-b from-[#ff77bd] via-[#d52fb2] to-transparent lg:left-1/2 lg:-translate-x-px"
           />
 
-          {/* Timeline Items */}
           <div className="space-y-8 sm:space-y-10 lg:space-y-12">
             {scheduleItems.map((item, i) => {
               const isLeft = i % 2 === 0;
@@ -164,36 +159,32 @@ export default function Schedule() {
                     isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'
                   }`}
                 >
-                  {/* Dot on timeline */}
-                  <div className="absolute left-4 z-10 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border-2 border-primary bg-white shadow-[0_0_15px_rgba(233,30,99,0.3)] animate-pulse-dot lg:left-1/2 lg:h-5 lg:w-5">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                  <div className="absolute left-4 z-10 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border-2 border-[#ff7abd] bg-[#1a0727] shadow-[0_0_15px_rgba(255,97,170,0.45)] animate-pulse-dot lg:left-1/2 lg:h-5 lg:w-5">
+                    <div className="w-1.5 h-1.5 bg-[#ff7abd] rounded-full"></div>
                   </div>
 
-                  {/* Content Card */}
                   <div
                     className={`ml-10 sm:ml-14 lg:ml-0 lg:w-[45%] ${
                       isLeft ? 'lg:pr-12' : 'lg:pl-12'
                     }`}
                   >
-                    <div className="glass-card relative overflow-hidden border border-black/5 bg-white p-5 sm:p-8 group transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-primary/10" />
-                      
-                      {/* Time Badge */}
+                    <div className="glass-card relative overflow-hidden p-5 sm:p-8 transition-all duration-300 hover:-translate-y-1">
+                      <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-white/10 blur-2xl -mr-16 -mt-16 transition-all duration-500" />
+
                       <span
-                        className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4 bg-primary/5 text-primary border border-primary/20 backdrop-blur-md relative z-10"
+                        className="relative z-10 mb-4 inline-block rounded-full border border-white/14 bg-white/10 px-4 py-1.5 text-sm font-semibold text-[#ffd0e8] backdrop-blur-md"
                       >
                         {item.time}
                       </span>
-                      <h3 className="font-['Syne'] text-xl sm:text-2xl font-bold text-foreground mb-2 tracking-tight relative z-10">
+                      <h3 className="relative z-10 font-['Syne'] text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
                         {item.title}
                       </h3>
-                      <p className="text-sm sm:text-base text-foreground/65 leading-relaxed">
+                      <p className="text-sm sm:text-base text-white/70 leading-relaxed">
                         {item.description}
                       </p>
                     </div>
                   </div>
 
-                  {/* Empty space for alternating layout */}
                   <div className="hidden lg:block lg:w-[45%]" />
                 </div>
               );

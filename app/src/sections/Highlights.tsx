@@ -1,40 +1,40 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Network, BookOpen, TrendingUp, HeartHandshake, Mic } from 'lucide-react';
+import { BookOpen, BriefcaseBusiness, HeartHandshake, Megaphone, UsersRound } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const highlights = [
   {
-    icon: BookOpen,
-    title: 'Ethical & Value-Based Business',
+    icon: BriefcaseBusiness,
+    title: 'Ethical and Value-Based Business',
     description:
-      'Building businesses grounded in strong values and ethical principles that create lasting, sustainable impact.',
+      'A grounded look at how conviction, responsibility, and long-term thinking can shape strong ventures.',
   },
   {
-    icon: Network,
-    title: 'Women Identity & Leadership',
+    icon: UsersRound,
+    title: 'Women, Identity, and Leadership',
     description:
-      'Balancing personal identity and leadership roles — navigating the unique challenges women face in entrepreneurship.',
-  },
-  {
-    icon: Mic,
-    title: 'Panel Discussion',
-    description:
-      'Inspiring insights from successful women entrepreneurs sharing their journeys, challenges, and triumphs.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Digital Marketing & Branding',
-    description:
-      'Learn how to market and brand your business digitally — practical strategies to build your online presence.',
+      'Reflections on confidence, visibility, leadership roles, and the realities women navigate in entrepreneurship.',
   },
   {
     icon: HeartHandshake,
+    title: 'Founders Panel and Shared Journeys',
+    description:
+      'A candid exchange of wins, setbacks, lessons, and lived experience from women building real businesses.',
+  },
+  {
+    icon: Megaphone,
+    title: 'Digital Marketing and Brand Presence',
+    description:
+      'Practical strategies to sharpen positioning, attract the right audience, and communicate your brand better.',
+  },
+  {
+    icon: BookOpen,
     title: 'Business Design Thinking',
     description:
-      'Strategies for innovation and scaling — creative approaches to solve business challenges and grow your enterprise.',
+      'Creative frameworks for solving business challenges, designing better offers, and finding new growth routes.',
   },
 ];
 
@@ -94,23 +94,28 @@ export default function Highlights() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:gap-12 lg:grid-cols-12 lg:gap-16">
-          {/* Left Column — Sticky Heading */}
           <div
             ref={leftRef}
             className="lg:col-span-4 lg:sticky lg:top-32 lg:self-start opacity-0"
           >
-            <span className="section-label text-primary block mb-4 sm:mb-6">What to Expect</span>
-            <h2 className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-foreground leading-[1.1] tracking-tight mb-5 sm:mb-6">
-              Sessions Designed to Empower &amp; Inspire
+            <span className="section-label text-primary block mb-4 sm:mb-6">Session Themes</span>
+            <h2 className="font-['Syne'] text-3xl sm:text-5xl lg:text-[56px] font-bold text-white leading-[1.05] tracking-tight mb-5 sm:mb-6">
+              A curated learning flow for women building the next chapter of their work.
             </h2>
-            <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-              Five expert-led sessions covering business ethics, leadership, digital branding,
-              design thinking, and live panel discussions — plus Special Consultation Desks
-              for personalised guidance.
+            <p className="text-base lg:text-lg text-white/76 leading-relaxed font-light">
+              The summit blends inspiration with practical business thinking. Every session is meant to
+              feel relevant, contemporary, and immediately useful, rather than overly formal or distant.
             </p>
+
+            <div className="mt-6 rounded-[28px] border border-white/10 bg-white/8 p-5 text-white/78 backdrop-blur-md">
+              <p className="text-xs uppercase tracking-[0.22em] text-white/50">Also included</p>
+              <p className="mt-3 text-sm leading-6">
+                Peer conversations, expert-led moments, consultation touchpoints, and space for women to
+                connect around ambition, identity, and responsibility.
+              </p>
+            </div>
           </div>
 
-          {/* Right Column — Highlight Cards */}
           <div
             ref={cardsRef}
             className="lg:col-span-8 space-y-4 sm:space-y-6"
@@ -118,17 +123,17 @@ export default function Highlights() {
             {highlights.map((item, i) => (
               <div
                 key={i}
-                className="glass-card relative overflow-hidden border border-black/5 bg-white p-5 sm:p-8 flex flex-col items-start gap-4 sm:flex-row sm:gap-6 group cursor-default transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+                className="glass-card relative flex cursor-default flex-col items-start gap-4 overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 sm:flex-row sm:gap-6 sm:p-8"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-primary/10" />
-                <div className="relative z-10 h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center flex-shrink-0 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 sm:h-16 sm:w-16">
-                  <item.icon size={28} className="text-primary" />
+                <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-white/10 blur-2xl -mr-16 -mt-16 transition-all duration-500" />
+                <div className="relative z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/10 text-[#ffd0e8] backdrop-blur-md transition-all duration-300 sm:h-16 sm:w-16">
+                  <item.icon size={28} />
                 </div>
                 <div className="relative z-10">
-                  <h3 className="font-['Syne'] text-xl sm:text-2xl font-bold text-foreground mb-2 tracking-tight">
+                  <h3 className="font-['Syne'] text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
                     {item.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-foreground/65 leading-relaxed">
+                  <p className="text-sm sm:text-base text-white/72 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
