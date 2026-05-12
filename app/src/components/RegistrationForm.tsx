@@ -47,6 +47,16 @@ const KERALA_DISTRICTS = [
   'Kasaragod',
 ] as const;
 
+const COUNTRY_CODES = [
+  { label: 'India', code: '+91' },
+  { label: 'UAE', code: '+971' },
+  { label: 'Saudi Arabia', code: '+966' },
+  { label: 'Qatar', code: '+974' },
+  { label: 'Kuwait', code: '+965' },
+  { label: 'Bahrain', code: '+973' },
+  { label: 'Oman', code: '+968' },
+] as const;
+
 const schema = z.object({
   fullName: z.string().min(2, 'Please enter your full name').max(120),
   age: z
@@ -56,9 +66,9 @@ const schema = z.object({
     .max(120, 'Age must be 120 or less'),
   whatsappNumber: z
     .string()
-    .min(7, 'Please enter a valid WhatsApp number')
-    .max(20)
-    .regex(/^[+\d\s\-()]+$/, 'Only digits and +, -, (), spaces are allowed'),
+    .min(5, 'Please enter a valid WhatsApp number')
+    .max(15)
+    .regex(/^\d+$/, 'Enter only digits without country code'),
   email: z.string().email('Please enter a valid email').max(200),
   district: z.enum(KERALA_DISTRICTS as unknown as [string, ...string[]], { message: 'Please select your district' }),
   ventureName: z.string().max(200).optional().or(z.literal('')),
@@ -90,6 +100,7 @@ const errorClass = 'mt-1.5 text-xs text-red-500';
 
 export default function RegistrationForm({ trigger }: Props) {
   const [open, setOpen] = useState(false);
+  const [countryCode, setCountryCode] = useState('+91');
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [activeQR, setActiveQR] = useState<ActiveQR | null>(null);
@@ -197,7 +208,7 @@ export default function RegistrationForm({ trigger }: Props) {
       const formData = new FormData();
       formData.append('fullName', values.fullName);
       formData.append('age', String(values.age));
-      formData.append('whatsappNumber', values.whatsappNumber);
+      formData.append('whatsappNumber', countryCode + values.whatsappNumber);
       formData.append('email', values.email);
       formData.append('district', values.district);
       formData.append('ventureName', values.ventureName?.trim() || 'N/A');
@@ -230,6 +241,7 @@ export default function RegistrationForm({ trigger }: Props) {
         setScreenshotPreview(null);
         setScreenshotError(null);
         setCopied(false);
+        setCountryCode('+91');
         reset({ ventureName: 'N/A' });
       }, 250);
     }
@@ -320,13 +332,26 @@ export default function RegistrationForm({ trigger }: Props) {
 
                   <div>
                     <label className={labelClass}>WhatsApp Number *</label>
-                    <input
-                      type="tel"
-                      autoComplete="tel"
-                      className={inputClass}
-                      placeholder="+91 98xxxxxxxx"
-                      {...register('whatsappNumber')}
-                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="w-32 rounded-xl bg-black/[0.02] border border-black/10 text-foreground px-3 py-3 outline-none transition focus:border-primary/50 focus:bg-black/[0.04] shrink-0"
+                      >
+                        {COUNTRY_CODES.map(({ label, code }) => (
+                          <option key={code} value={code}>
+                            {code} {label}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        autoComplete="tel-national"
+                        className={`${inputClass} flex-1`}
+                        placeholder="98xxxxxxxx"
+                        {...register('whatsappNumber')}
+                      />
+                    </div>
                     {errors.whatsappNumber && (
                       <p className={errorClass}>{errors.whatsappNumber.message}</p>
                     )}

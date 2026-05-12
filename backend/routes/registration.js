@@ -8,6 +8,9 @@ const {
   BUSINESS_SCALE_OPTIONS,
 } = require('../models/Registration');
 const { paymentScreenshotUpload, getCdnUrl } = require('../config/spaces');
+const { sendWhatsAppText } = require('../config/dxing');
+
+const SUPPORT_NUMBER = process.env.SUPPORT_WHATSAPP || '+91 9947846195';
 
 const router = express.Router();
 
@@ -90,6 +93,23 @@ router.post('/', submitLimiter, (req, res) => {
         industry,
         businessStage,
         businessScale,
+      });
+
+      // Fire-and-forget: send confirmation WhatsApp message
+      const confirmationMsg =
+        `Hello ${doc.fullName}! 🎉\n\n` +
+        `Thank you for registering for the *Women Entrepreneurs Summit 2026*!\n\n` +
+        `Your registration is currently in process. We have received your payment screenshot and it will be verified shortly.\n\n` +
+        `✅ *Payment:* Received & under review\n` +
+        `📅 *Event Date:* 20 June 2026\n` +
+        `📍 *Venue:* KPM TRIPENTA HOTEL, Calicut\n\n` +
+        `We will review your payment and send your entry pass within *24 hours*.\n\n` +
+        `If you don't receive an update within 24 hours, please contact us for support:\n` +
+        `📞 ${SUPPORT_NUMBER}\n\n` +
+        `— Team WES`;
+
+      sendWhatsAppText(doc.whatsappNumber, confirmationMsg).catch((err) => {
+        console.error('[registration] Failed to send confirmation WhatsApp to', doc.whatsappNumber, err.message);
       });
 
       return res.status(201).json({
