@@ -365,7 +365,7 @@ router.post('/registrations/:id/send-pass', async (req, res) => {
       return res.status(400).json({ error: 'Entry pass must be generated first' });
     }
 
-    const caption = `🎟️ *WOMEN ENTREPRENEURS SUMMIT 2026*\n\nDear *${doc.fullName}*,\n\nYour entry pass has been confirmed! ✅\n\n📅 Date: 20 June 2026\n📍 Venue: Manuelsons Malabar Palace, Calicut\n🆔 Pass ID: *${doc.entryPassId}*\n\nPlease show this pass at the entrance for check-in.\n\nSee you at the summit! 🌟`;
+    const caption = `🎟️ *WOMEN ENTREPRENEURS SUMMIT 2026*\n\nDear *${doc.fullName}*,\n\nYour entry pass has been confirmed! ✅\n\n📅 Date: 20 June 2026\n📍 Venue: KPM TRIPENTA HOTEL, Calicut\n🆔 Pass ID: *${doc.entryPassId}*\n\nPlease show this pass at the entrance for check-in.\n\nSee you at the summit! 🌟`;
 
     await sendWhatsAppImage(doc.whatsappNumber, doc.entryPassUrl, caption);
 
