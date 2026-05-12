@@ -1,6 +1,16 @@
 /* Scoped admin panel styling — kept visually identical to the original static admin */
 
 .admin-shell {
+  --background: 0 0% 100%;
+  --foreground: 270 100% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 270 100% 7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 270 100% 7%;
+  --muted: 330 20% 96%;
+  --muted-foreground: 270 12% 34%;
+  --border: 0 0% 0% / 0.08;
+  --input: 0 0% 0% / 0.08;
   font-family: 'Outfit', system-ui, sans-serif;
   background:
     radial-gradient(1200px 600px at 80% -10%, rgba(230, 25, 128, 0.07), transparent 60%),
@@ -30,6 +40,11 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.admin-shell .glass,
+.admin-shell .glass-strong {
+  color: hsl(var(--foreground));
 }
 
 .admin-shell .pill {

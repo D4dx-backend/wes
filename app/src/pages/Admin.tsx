@@ -1,5 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import * as XLSX from 'xlsx';
 import './admin.css';
+
+const KERALA_DISTRICTS = [
+  'Thiruvananthapuram',
+  'Kollam',
+  'Pathanamthitta',
+  'Alappuzha',
+  'Kottayam',
+  'Idukki',
+  'Ernakulam',
+  'Thrissur',
+  'Palakkad',
+  'Malappuram',
+  'Kozhikode',
+  'Wayanad',
+  'Kannur',
+  'Kasaragod',
+];
 
 const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 const TOKEN_KEY = 'wes_admin_token';
@@ -262,7 +280,7 @@ function Dashboard({
   onLogout: () => void;
   onToast: (message: string, kind?: 'success' | 'error') => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'registrations' | 'payment-qr'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'payment-qr' | 'check-ins'>('registrations');
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -506,25 +524,47 @@ function Dashboard({
     });
   }, [onLogout]);
 
-  const onExport = async () => {
+  const onExportExcel = async () => {
     try {
-      const res = await apiRequest('/api/admin/registrations/export', { token });
-      if (res.status === 401) {
-        onLogout();
-        return;
+      let allItems: Registration[] = [];
+      let pg = 1;
+      const lim = 200;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const data = await apiJson<ListResponse>(
+          `/api/admin/registrations?page=${pg}&limit=${lim}&sortBy=createdAt&sortDir=desc`,
+          { token }
+        );
+        allItems = [...allItems, ...data.items];
+        if (allItems.length >= data.total || data.items.length === 0) break;
+        pg++;
       }
-      if (!res.ok) throw new Error('Export failed');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `wes-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+
+      const rows = allItems.map((r) => ({
+        'Submitted At': r.createdAt ? new Date(r.createdAt).toLocaleString() : '',
+        'Full Name': r.fullName || '',
+        'Age': r.age ?? '',
+        'WhatsApp': r.whatsappNumber || '',
+        'Email': r.email || '',
+        'District': r.district || '',
+        'Venture / Business': r.ventureName || '',
+        'Industry': r.industry || '',
+        'Business Stage': r.businessStage || '',
+        'Business Scale': r.businessScale || '',
+        'Payment Verified': r.paymentVerified ? 'Yes' : 'No',
+        'Pass Generated': r.entryPassGenerated ? 'Yes' : 'No',
+        'Pass ID': r.entryPassId || '',
+        'Pass Sent At': r.entryPassSentAt ? new Date(r.entryPassSentAt).toLocaleString() : '',
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Registrations');
+      XLSX.writeFile(wb, `wes-registrations-${new Date().toISOString().slice(0, 10)}.xlsx`);
     } catch (err) {
-      onToast((err as Error).message, 'error');
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
     }
   };
 
@@ -539,8 +579,8 @@ function Dashboard({
             <div className="text-xs text-foreground/50">Registration Dashboard</div>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={onExport} className="pill pill-outline text-sm hidden md:inline-flex">
-              Export CSV
+            <button onClick={onExportExcel} className="pill pill-outline text-sm hidden md:inline-flex">
+              Export Excel
             </button>
             <button onClick={requestLogout} className="pill pill-outline text-sm">
               Logout
@@ -567,6 +607,16 @@ function Dashboard({
             }`}
           >
             Payment QR
+          </button>
+          <button
+            onClick={() => setActiveTab('check-ins')}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === 'check-ins'
+                ? 'border-[#e61980] text-[#e61980]'
+                : 'border-transparent text-foreground/50 hover:text-foreground/70'
+            }`}
+          >
+            Check-ins
           </button>
         </div>
       </header>
@@ -615,8 +665,10 @@ function Dashboard({
               onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
             />
           </>
-        ) : (
+        ) : activeTab === 'payment-qr' ? (
           <PaymentQRManager token={token} onToast={onToast} onLogout={onLogout} />
+        ) : (
+          <CheckInsManager token={token} onToast={onToast} onLogout={onLogout} />
         )}
       </main>
 
@@ -706,7 +758,6 @@ function FiltersBar({
 }) {
   // local state for debounced text inputs
   const [search, setSearch] = useState(filters.search);
-  const [district, setDistrict] = useState(filters.district);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -716,15 +767,6 @@ function FiltersBar({
     }, 250);
     return () => window.clearTimeout(t);
   }, [search, filters.search, onFilterChange]);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => {
-      if (district !== filters.district) {
-        onFilterChange('district', district);
-      }
-    }, 250);
-    return () => window.clearTimeout(t);
-  }, [district, filters.district, onFilterChange]);
 
   return (
     <div className="glass p-5">
@@ -795,12 +837,16 @@ function FiltersBar({
           <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             District
           </label>
-          <input
+          <select
             className="input"
-            placeholder="Any"
-            value={district}
-            onChange={(e) => setDistrict(e.target.value)}
-          />
+            value={filters.district}
+            onChange={(e) => onFilterChange('district', e.target.value)}
+          >
+            <option value="">Any</option>
+            {KERALA_DISTRICTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
         </div>
         <div className="md:col-span-3">
           <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
@@ -1627,6 +1673,304 @@ function PaymentQRManager({
           onClose={() => setConfirmDialog(null)}
         />
       )}
+    </div>
+  );
+}
+
+/* ----------------- CHECK-INS MANAGER ----------------- */
+
+type CheckInItem = {
+  _id: string;
+  fullName?: string;
+  ventureName?: string;
+  district?: string;
+  entryPassId?: string;
+  checkedInAt?: string;
+  checkedInBy?: string;
+  whatsappNumber?: string;
+};
+
+type CheckInStatsResponse = {
+  totalCheckedIn: number;
+  totalWithPass: number;
+  percentage: number;
+};
+
+type CheckInListResponse = {
+  items: CheckInItem[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+};
+
+function CheckInsManager({
+  token,
+  onToast,
+  onLogout,
+}: {
+  token: string;
+  onToast: (message: string, kind?: 'success' | 'error') => void;
+  onLogout: () => void;
+}) {
+  const [stats, setStats] = useState<CheckInStatsResponse | null>(null);
+  const [list, setList] = useState<CheckInListResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+
+  const handleAuthError = useCallback(
+    (err: unknown) => {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) {
+        onLogout();
+        return true;
+      }
+      return false;
+    },
+    [onLogout]
+  );
+
+  // Debounce search
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [search]);
+
+  const loadStats = useCallback(async () => {
+    try {
+      const data = await apiJson<CheckInStatsResponse>('/api/admin/check-ins/stats', { token });
+      setStats(data);
+    } catch (err) {
+      if (!handleAuthError(err)) onToast((err as Error).message, 'error');
+    }
+  }, [token, handleAuthError, onToast]);
+
+  const loadList = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        sortBy: 'checkedInAt',
+        sortDir: 'desc',
+      });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+
+      const data = await apiJson<CheckInListResponse>(
+        `/api/admin/check-ins?${params.toString()}`,
+        { token }
+      );
+      setList(data);
+    } catch (err) {
+      if (!handleAuthError(err)) onToast((err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [token, page, limit, debouncedSearch, handleAuthError, onToast]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
+
+  const onExportCheckIns = async () => {
+    try {
+      let allItems: CheckInItem[] = [];
+      let pg = 1;
+      const lim = 200;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const data = await apiJson<CheckInListResponse>(
+          `/api/admin/check-ins?page=${pg}&limit=${lim}&sortBy=checkedInAt&sortDir=desc`,
+          { token }
+        );
+        allItems = [...allItems, ...data.items];
+        if (allItems.length >= data.total || data.items.length === 0) break;
+        pg++;
+      }
+
+      const rows = allItems.map((ci) => ({
+        'Checked In At': ci.checkedInAt ? new Date(ci.checkedInAt).toLocaleString() : '',
+        'Full Name': ci.fullName || '',
+        'WhatsApp': ci.whatsappNumber || '',
+        'District': ci.district || '',
+        'Venture / Business': ci.ventureName || '',
+        'Pass ID': ci.entryPassId || '',
+        'Checked In By': ci.checkedInBy || '',
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Check-ins');
+      XLSX.writeFile(wb, `wes-check-ins-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (err) {
+      const e = err as Error & { code?: number };
+      if (e?.code === 401) { onLogout(); return; }
+      onToast(e.message, 'error');
+    }
+  };
+
+  const totalPages = list?.pages ?? 1;
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="glass p-5">
+          <div className="text-xs uppercase tracking-wider text-foreground/50">Checked In</div>
+          <div className="admin-display text-3xl font-bold mt-2">
+            {stats?.totalCheckedIn ?? '—'}
+          </div>
+        </div>
+        <div className="glass p-5">
+          <div className="text-xs uppercase tracking-wider text-foreground/50">Total Passes</div>
+          <div className="admin-display text-3xl font-bold mt-2">
+            {stats?.totalWithPass ?? '—'}
+          </div>
+        </div>
+        <div className="glass p-5">
+          <div className="text-xs uppercase tracking-wider text-foreground/50">Attendance</div>
+          <div className="admin-display text-3xl font-bold mt-2">
+            {stats ? `${stats.percentage}%` : '—'}
+          </div>
+        </div>
+        <div className="glass p-5">
+          <div className="text-xs uppercase tracking-wider text-foreground/50">Remaining</div>
+          <div className="admin-display text-3xl font-bold mt-2">
+            {stats ? stats.totalWithPass - stats.totalCheckedIn : '—'}
+          </div>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="glass p-5">
+        <div className="flex flex-col md:flex-row md:items-end gap-3">
+          <div className="flex-1">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
+              Search
+            </label>
+            <input
+              className="input"
+              placeholder="Name, pass ID, venture, district…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="w-32">
+            <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
+              Per page
+            </label>
+            <select
+              className="input"
+              value={limit}
+              onChange={(e) => {
+                setLimit(parseInt(e.target.value, 10) || 20);
+                setPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+          <button
+            onClick={() => { loadStats(); loadList(); }}
+            className="pill pill-outline text-sm"
+          >
+            Refresh
+          </button>
+          <button onClick={onExportCheckIns} className="pill pill-outline text-sm">
+            Export Excel
+          </button>
+          <a href="/scanner" target="_blank" rel="noopener noreferrer" className="pill pill-primary text-sm">
+            Open Scanner
+          </a>
+        </div>
+        <div className="mt-2 text-sm text-foreground/50">
+          {list ? `${list.total} checked-in attendee${list.total === 1 ? '' : 's'}` : ''}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="glass overflow-hidden">
+        <div className="scroll-x">
+          <table className="data" style={{ tableLayout: 'auto' }}>
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Venture</th>
+                <th>District</th>
+                <th>Pass ID</th>
+                <th>Checked In At</th>
+                <th>By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-10 text-foreground/50">
+                    <span className="spinner" />
+                  </td>
+                </tr>
+              ) : !list || list.items.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-10 text-foreground/50">
+                    No check-ins yet.
+                  </td>
+                </tr>
+              ) : (
+                list.items.map((ci) => (
+                  <tr key={ci._id}>
+                    <td>
+                      <div className="font-semibold">{ci.fullName || '—'}</div>
+                    </td>
+                    <td>{ci.ventureName || '—'}</td>
+                    <td>{ci.district || '—'}</td>
+                    <td>
+                      <span className="font-mono text-xs">{ci.entryPassId || '—'}</span>
+                    </td>
+                    <td className="text-xs">{formatDate(ci.checkedInAt, true)}</td>
+                    <td className="text-xs text-foreground/60">{ci.checkedInBy || '—'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex items-center justify-between px-5 py-4 border-t border-black/10">
+          <div className="text-sm text-foreground/50">
+            {list && totalPages > 0
+              ? `Page ${list.page} of ${totalPages} · ${list.total} total`
+              : '—'}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="pill pill-outline text-sm"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="pill pill-outline text-sm"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,15 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarDays, MapPin, Sparkles, Users } from 'lucide-react';
 import gsap from 'gsap';
 import RegistrationForm from '../components/RegistrationForm';
 
+const spotlightCards = [
+  {
+    value: '250+',
+    label: 'Founders, aspirants, and business leaders from across Kerala',
+  },
+  {
+    value: '5+',
+    label: 'Theme-led learning tracks on identity, ethics, marketing, and design thinking',
+  },
+  {
+    value: '1 Day',
+    label: 'A focused summit for insight, collaboration, and practical next steps',
+  },
+];
+
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
+  const topCardRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const wesRef = useRef<HTMLImageElement>(null);
-  const titleRefs = useRef<HTMLHeadingElement[]>([]);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const bannerRef = useRef<HTMLDivElement>(null);
+  const metaRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const sidePanelRef = useRef<HTMLDivElement>(null);
   const shape1Ref = useRef<HTMLImageElement>(null);
   const shape2Ref = useRef<HTMLImageElement>(null);
   const shape3Ref = useRef<HTMLImageElement>(null);
@@ -46,23 +65,23 @@ export default function Hero() {
 
       // Entrance timeline
       const tl = gsap.timeline({ delay: 0.3 });
+      const cardNodes = cardsRef.current ? Array.from(cardsRef.current.children) : [];
 
       tl.fromTo(
+        topCardRef.current,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }
+      )
+        .fromTo(
         badgeRef.current,
         { y: 30, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
-      )
-        .fromTo(
-          wesRef.current,
-          { scale: 0.8, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 1.0, ease: 'power3.out' },
-          '-=0.4'
         )
         .fromTo(
-          titleRefs.current,
+          titleRef.current,
           { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, stagger: 0.12, duration: 0.8, ease: 'power3.out' },
-          '-=0.6'
+          { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' },
+          '-=0.45'
         )
         .fromTo(
           subtitleRef.current,
@@ -71,10 +90,28 @@ export default function Hero() {
           '-=0.3'
         )
         .fromTo(
-          bannerRef.current,
-          { scale: 0.9, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' },
+          metaRef.current,
+          { y: 24, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' },
+          '-=0.25'
+        )
+        .fromTo(
+          ctaRef.current,
+          { y: 18, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' },
           '-=0.2'
+        )
+        .fromTo(
+          cardNodes,
+          { y: 30, opacity: 0, scale: 0.95 },
+          { y: 0, opacity: 1, scale: 1, stagger: 0.12, duration: 0.8, ease: 'power3.out' },
+          '-=0.2'
+        )
+        .fromTo(
+          sidePanelRef.current,
+          { x: 24, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+          '-=0.55'
         )
         .fromTo(
           [shape1Ref.current, shape2Ref.current, shape3Ref.current],
@@ -173,86 +210,153 @@ export default function Hero() {
       />
 
       {/* Hero Content */}
-      <div className="relative z-10 mx-auto max-w-4xl px-5 pb-20 pt-24 text-center sm:px-6 sm:pb-24 sm:pt-32">
-        {/* Top Badge */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-16 pt-24 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8 lg:pb-24">
         <div
-          ref={badgeRef}
-          className="mb-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 opacity-0 sm:mb-8"
+          ref={topCardRef}
+          className="mx-auto mb-6 max-w-5xl overflow-hidden rounded-[28px] border border-white/20 bg-white/10 p-2 opacity-0 shadow-[0_24px_70px_rgba(6,2,18,0.35)] backdrop-blur-xl sm:mb-8"
         >
-          <span className="text-primary text-xs">&#9670;</span>
-          <span className="max-w-[17rem] text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/80 sm:max-w-none sm:text-sm sm:tracking-[0.15em]">
-            Jamaat-e-Islami Hind · Women&apos;s Wing Kerala
-          </span>
-          <span className="text-primary text-xs">&#9670;</span>
-        </div>
-
-        {/* WES Logo */}
-        <img
-          ref={wesRef}
-          src="/Wes.png"
-          alt="WES"
-          className="mx-auto mb-5 w-[148px] object-contain opacity-0 sm:mb-8 sm:w-[280px] lg:w-[350px]"
-        />
-
-        {/* Title Lines */}
-        <h2
-          ref={(el) => { if (el) titleRefs.current[0] = el; }}
-          className="mx-auto max-w-[16rem] px-1 font-['Syne'] text-[clamp(1.8rem,7.5vw,2.3rem)] font-bold uppercase tracking-[-0.04em] text-foreground opacity-0 leading-[0.92] sm:max-w-none sm:px-0 sm:text-[64px] sm:tracking-tight lg:text-[80px]"
-        >
-          Women
-        </h2>
-        <h2
-          ref={(el) => { if (el) titleRefs.current[1] = el; }}
-          className="mx-auto max-w-[16rem] px-1 font-['Syne'] text-[clamp(1.55rem,6.6vw,2rem)] font-bold uppercase tracking-[-0.035em] text-foreground opacity-0 leading-[0.94] sm:max-w-none sm:px-0 sm:text-[64px] sm:tracking-tight lg:text-[80px]"
-        >
-          Entrepreneurs
-        </h2>
-        <h2
-          ref={(el) => { if (el) titleRefs.current[2] = el; }}
-          className="mx-auto mb-5 max-w-[16rem] px-1 font-['Syne'] text-[clamp(1.8rem,7.5vw,2.3rem)] font-bold uppercase tracking-[-0.04em] text-foreground opacity-0 leading-[0.92] sm:mb-8 sm:max-w-none sm:px-0 sm:text-[64px] sm:tracking-tight lg:text-[80px]"
-        >
-          Summit
-        </h2>
-
-        {/* Subtitle */}
-        <p
-          ref={subtitleRef}
-          className="mx-auto mb-7 max-w-[16rem] px-1 text-[0.95rem] font-light italic text-foreground/70 opacity-0 sm:mb-10 sm:max-w-xl sm:px-0 sm:text-xl"
-        >
-          Empowering Women Entrepreneurs
-        </p>
-
-        {/* Date Banner */}
-        <div
-          ref={bannerRef}
-          className="inline-flex max-w-full flex-col items-center gap-3 rounded-2xl border border-black/10 bg-white/80 px-4 py-4 opacity-0 shadow-sm backdrop-blur-md sm:mb-10 sm:flex-row sm:gap-6 sm:px-10 sm:py-4"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-2 text-center text-xs font-medium text-foreground sm:text-base">
-            <span className="text-primary">&#9670;</span>
-            <span>JUNE 2026</span>
-            <span className="text-primary">&#9670;</span>
-          </div>
-          <div className="font-['Syne'] text-[48px] font-bold leading-none tracking-tighter text-foreground sm:text-[80px]">
-            20
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 text-center text-xs font-medium text-foreground sm:text-base">
-            <span>Saturday</span>
-            <span className="text-primary">&#9670;</span>
-            <span>10 AM</span>
-            <span className="text-primary">&#9670;</span>
-            <span>Kozhikode</span>
-          </div>
-        </div>
-
-        <div className="mt-5 sm:mt-6">
-          <RegistrationForm
-            trigger={
-              <button className="pill-button pill-button-primary mx-auto inline-flex w-full max-w-[16rem] items-center justify-center gap-2 border border-black/10 bg-white text-foreground shadow-sm hover:bg-gray-50 sm:w-auto sm:max-w-none">
-                Register Now
-                <ArrowRight size={16} />
-              </button>
-            }
+          <img
+            src="/banner.jpeg"
+            alt="Women Entrepreneurs Summit banner"
+            className="h-auto w-full rounded-[22px] border border-white/10 object-cover"
           />
+        </div>
+
+        <div
+          ref={contentRef}
+          className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.15fr)_380px] lg:gap-10"
+        >
+          <div>
+            <div
+              ref={badgeRef}
+              className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-2 text-left opacity-0 backdrop-blur-md sm:mb-6"
+            >
+              <Sparkles className="h-4 w-4 text-[#ffd1ea]" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#ffe7f5] sm:text-xs">
+                Jamaat-e-Islami Hind Women&apos;s Wing Kerala presents
+              </span>
+            </div>
+
+            <h1
+              ref={titleRef}
+              className="max-w-4xl text-[1.7rem] font-bold leading-[1.1] tracking-[-0.03em] text-white opacity-0 sm:text-[2.2rem] lg:text-[2.8rem]"
+            >
+              Build with purpose.
+              <br />
+              Lead with clarity.
+              <br />
+              Rise together.
+            </h1>
+
+            <p
+              ref={subtitleRef}
+              className="mt-5 max-w-2xl text-base leading-7 text-white/80 opacity-0 sm:mt-6 sm:text-lg"
+            >
+              Women Entrepreneurs Summit 2026 brings together founders, aspiring entrepreneurs,
+              professionals, and community leaders for a high-energy day of insight, direction,
+              networking, and values-led business conversations in Kozhikode.
+            </p>
+
+            <div
+              ref={metaRef}
+              className="mt-6 grid gap-3 opacity-0 sm:mt-8 sm:grid-cols-3"
+            >
+              <div className="glass-card flex items-center gap-3 px-4 py-4 text-left text-white sm:px-5">
+                <div className="rounded-2xl bg-white/10 p-2.5 text-[#ffd0e8]">
+                  <CalendarDays className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/60">Date</p>
+                  <p className="text-sm font-semibold sm:text-base">20 June 2026, Saturday</p>
+                </div>
+              </div>
+              <div className="glass-card flex items-center gap-3 px-4 py-4 text-left text-white sm:px-5">
+                <div className="rounded-2xl bg-white/10 p-2.5 text-[#ffd0e8]">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/60">Location</p>
+                  <p className="text-sm font-semibold sm:text-base">Kozhikode, Kerala</p>
+                </div>
+              </div>
+              <div className="glass-card flex items-center gap-3 px-4 py-4 text-left text-white sm:px-5">
+                <div className="rounded-2xl bg-white/10 p-2.5 text-[#ffd0e8]">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/60">Access</p>
+                  <p className="text-sm font-semibold sm:text-base">Limited seats, curated audience</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              ref={ctaRef}
+              className="mt-6 flex flex-col gap-3 opacity-0 sm:mt-8 sm:flex-row sm:items-center"
+            >
+              <RegistrationForm
+                trigger={
+                  <button className="pill-button pill-button-primary inline-flex w-full items-center justify-center gap-2 border border-white/10 sm:w-auto">
+                    Register Now
+                    <ArrowRight size={16} />
+                  </button>
+                }
+              />
+              <button
+                onClick={() => document.getElementById('schedule')?.scrollIntoView({ behavior: 'smooth' })}
+                className="pill-button inline-flex w-full items-center justify-center gap-2 border border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto"
+              >
+                Explore Sessions
+              </button>
+            </div>
+
+            <div
+              ref={cardsRef}
+              className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-3"
+            >
+              {spotlightCards.map((card) => (
+                <div key={card.value} className="glass-card p-4 text-left text-white/90 sm:p-5">
+                  <p className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{card.value}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/72">{card.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            ref={sidePanelRef}
+            className="immersive-panel rounded-[30px] p-5 text-white opacity-0 backdrop-blur-xl sm:p-6 lg:sticky lg:top-28"
+          >
+            <img
+              src="/Wes.png"
+              alt="Women Entrepreneurs Summit"
+              className="mb-5 h-16 object-contain sm:h-20"
+            />
+            <div className="rounded-[24px] border border-white/12 bg-black/10 p-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/55">Summit focus</p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight">A modern platform for women who want direction, visibility, and meaningful connections.</h2>
+              <div className="mt-5 space-y-3 text-sm leading-6 text-white/75">
+                <p>Explore conversations around values-led enterprise, women&apos;s leadership, branding, digital growth, and innovation.</p>
+                <p>Meet founders, mentors, and peers who understand the realities of building and scaling with intention.</p>
+                <p>Leave with sharper perspective, stronger networks, and practical energy to move forward.</p>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[24px] border border-white/12 bg-white/8 p-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/55">Registration</p>
+              <div className="mt-3 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-4xl font-bold tracking-tight">₹1,000</p>
+                  <p className="mt-1 text-sm text-white/68">Per participant</p>
+                </div>
+                <div className="text-right text-xs uppercase tracking-[0.18em] text-white/55">
+                  Limited
+                  <br />
+                  seats
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

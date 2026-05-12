@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Users, Mic, Calendar } from 'lucide-react';
+import { Compass, Handshake, Lightbulb, ShieldCheck } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
-  { icon: Users, number: '250+', label: 'Women Entrepreneurs' },
-  { icon: Mic, number: '10+', label: 'Expert Speakers' },
-  { icon: Calendar, number: '1', label: 'Day of Inspiration' },
+  { icon: Compass, number: 'Clarity', label: 'Understand where your venture can grow next' },
+  { icon: Handshake, number: 'Community', label: 'Meet women building, scaling, and supporting businesses' },
+  { icon: Lightbulb, number: 'Momentum', label: 'Leave with ideas you can translate into action' },
+  { icon: ShieldCheck, number: 'Values', label: 'Explore business growth rooted in purpose and ethics' },
 ];
 
 export default function About() {
@@ -103,78 +104,79 @@ export default function About() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative bg-background py-20 sm:py-24 lg:py-32"
+      className="relative py-20 sm:py-24 lg:py-32"
     >
-      {/* Top Wave Divider */}
-      <div className="absolute top-0 left-0 w-full rotate-180">
-        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-          <path
-            d="M0 80L60 72C120 64 240 48 360 40C480 32 600 32 720 36C840 40 960 48 1080 52C1200 56 1320 56 1380 56L1440 56V80H0Z"
-            fill="#FFFFFF"
-          />
-        </svg>
-      </div>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-2 mb-12 sm:mb-16">
-          <div className="text-left">
-            {/* Section Label */}
-            <span
-              ref={labelRef}
-              className="section-label text-primary block mb-4 sm:mb-6 opacity-0"
-            >
-              About the Summit
-            </span>
+        <div className="overflow-hidden rounded-[32px] border border-white/12 bg-white/[0.06] p-6 shadow-[0_24px_70px_rgba(7,2,20,0.24)] backdrop-blur-xl sm:p-8 lg:p-10">
+          {/* Label */}
+          <span
+            ref={labelRef}
+            className="section-label text-primary block mb-3 sm:mb-5 opacity-0"
+          >
+            Summit Overview
+          </span>
 
-            {/* Section Heading */}
-            <h2
-              ref={headingRef}
-              className="font-['Syne'] text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 sm:mb-8 opacity-0 leading-[1.1] tracking-tight"
-            >
-              A Premier Platform for <span className="text-primary">Muslim Women Entrepreneurs</span>
-            </h2>
+          {/* Heading — full width, smaller */}
+          <h2
+            ref={headingRef}
+            className="font-['Syne'] text-xl sm:text-2xl lg:text-[2.1rem] font-bold text-white mb-6 sm:mb-8 opacity-0 leading-[1.12] tracking-tight max-w-3xl"
+          >
+            A summit for women who want stronger direction, deeper networks, and business growth that stays true to their values.
+          </h2>
 
-            {/* Body Paragraphs */}
-            <div
-              ref={parasRef}
-              className="space-y-5 sm:space-y-6"
-            >
-              <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-                Women Entrepreneurs Summit (WES) is a unique program that brings together Muslim women
-                entrepreneurs from various sectors across Kerala — designed as a platform where women
-                who aspire to grow in entrepreneurship can gain guidance, inspiration, and networking
-                opportunities all in one place.
-              </p>
-              <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-                Many businesses still face challenges such as lack of proper guidance, limited market
-                knowledge, and weak professional networks. WES addresses this by creating a dynamic
-                platform for knowledge sharing, experience exchange, and exploring new opportunities.
-              </p>
-              <p className="text-base lg:text-lg text-foreground/80 leading-relaxed font-light">
-                Join us on June 20, 2026, at KPM TRIPENTA HOTEL, Kozhikode — for a transformative
-                day designed to empower, connect, and inspire women entrepreneurs across Kerala.
-              </p>
+          {/* Paragraphs — full width, 3-col on lg */}
+          <div
+            ref={parasRef}
+            className="grid gap-4 sm:gap-5 mb-7 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <p className="text-sm text-white/75 leading-relaxed font-light">
+              Women Entrepreneurs Summit is designed as an immersive day for entrepreneurs,
+              aspiring founders, professionals, and changemakers who are looking for more than
+              generic motivation. The event is built to offer real perspective, meaningful
+              connections, and practical learning.
+            </p>
+            <p className="text-sm text-white/75 leading-relaxed font-light">
+              Across Kerala, many women-led ventures still face barriers around confidence,
+              visibility, mentorship, market access, and sustainable strategy. WES brings those
+              conversations into one room with a stronger sense of purpose and community.
+            </p>
+            <p className="text-sm text-white/75 leading-relaxed font-light sm:col-span-2 lg:col-span-1">
+              Expect an environment that feels contemporary and welcoming, with focused sessions,
+              thoughtful networking, and room for both business ambition and personal conviction.
+            </p>
+          </div>
+
+          {/* Who / What — 2-col, full width */}
+          <div className="grid gap-3 mb-7 sm:grid-cols-2">
+            <div className="rounded-[20px] border border-white/12 bg-black/10 p-4 text-white/82">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-white/48 mb-2">Who should attend</p>
+              <p className="text-sm leading-6">Women entrepreneurs, startup dreamers, home-business owners, creators, professionals, and community leaders.</p>
+            </div>
+            <div className="rounded-[20px] border border-white/12 bg-black/10 p-4 text-white/82">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-white/48 mb-2">What to expect</p>
+              <p className="text-sm leading-6">Live sessions, peer exchange, practical insight, fresh encouragement, and a renewed sense of direction.</p>
             </div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats cards — icon + title on same line, 4-col */}
           <div
             ref={statsRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6"
+            className="grid grid-cols-2 gap-3 lg:grid-cols-4"
           >
-            {stats.map((stat, i) => (
+            {stats.map((stat) => (
               <div
-                key={i}
-                className={`glass-card glass-card-hover p-5 sm:p-6 lg:p-8 flex flex-col items-start cursor-default relative overflow-hidden ${i === 2 ? 'sm:col-span-2' : ''}`}
+                key={stat.number}
+                className="glass-card relative overflow-hidden p-3.5 text-left text-white sm:p-4"
               >
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/10 rounded-full blur-xl" />
-                <div className="mb-5 h-12 w-12 rounded-2xl bg-primary/5 border border-black/10 flex items-center justify-center backdrop-blur-md sm:mb-6 sm:h-14 sm:w-14">
-                  <stat.icon size={28} className="text-primary" />
+                <div className="mb-2 flex items-center gap-2">
+                  <div className="flex-shrink-0 rounded-xl border border-white/12 bg-white/10 p-1.5 text-[#ffd2e8]">
+                    <stat.icon size={14} />
+                  </div>
+                  <div className="font-['Syne'] text-sm font-bold leading-tight tracking-tight">
+                    {stat.number}
+                  </div>
                 </div>
-                <div className="font-['Syne'] text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2 tracking-tight">
-                  {stat.number}
-                </div>
-                <div className="text-sm font-medium uppercase tracking-wider text-foreground/60">
+                <div className="text-xs leading-5 text-white/62">
                   {stat.label}
                 </div>
               </div>
