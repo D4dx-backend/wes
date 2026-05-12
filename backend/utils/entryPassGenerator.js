@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const EVENT_NAME = 'WOMEN ENTREPRENEURS SUMMIT';
 const EVENT_DATE = '20 June 2026';
-const EVENT_VENUE = 'Manuelsons Malabar Palace, Calicut';
+const EVENT_VENUE = 'KPM TRIPENTA HOTEL, Calicut';
 
 /**
  * Generate a unique short pass ID (8 chars uppercase)
