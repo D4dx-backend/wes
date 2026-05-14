@@ -1410,6 +1410,15 @@ function PaymentQRManager({
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Edit modal state
+  const [editItem, setEditItem] = useState<PaymentQRItem | null>(null);
+  const [editUpiId, setEditUpiId] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editLabel, setEditLabel] = useState('');
+  const [editQrFile, setEditQrFile] = useState<File | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const editFileRef = useRef<HTMLInputElement>(null);
+
   const loadItems = useCallback(async () => {
     try {
       const data = await apiJson<{ items: PaymentQRItem[] }>('/api/admin/payment-qr', { token });
@@ -1518,6 +1527,49 @@ function PaymentQRManager({
       },
     });
   }, []);
+
+  const openEditModal = useCallback((item: PaymentQRItem) => {
+    setEditItem(item);
+    setEditUpiId(item.upiId);
+    setEditAmount(String(item.amount));
+    setEditLabel(item.label ?? '');
+    setEditQrFile(null);
+    if (editFileRef.current) editFileRef.current.value = '';
+  }, []);
+
+  const onSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editItem) return;
+    if (!editUpiId.trim() || !editAmount.trim()) {
+      onToast('UPI ID and amount are required', 'error');
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append('upiId', editUpiId.trim());
+      fd.append('amount', editAmount.trim());
+      fd.append('label', editLabel.trim());
+      if (editQrFile) fd.append('qrImage', editQrFile);
+
+      const res = await apiRequest(`/api/admin/payment-qr/${editItem._id}`, {
+        method: 'PATCH',
+        token,
+        formData: fd,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { onLogout(); return; }
+      if (!res.ok) throw new Error(data.error || 'Update failed');
+
+      onToast('Payment QR updated', 'success');
+      setEditItem(null);
+      await loadItems();
+    } catch (err) {
+      onToast((err as Error).message, 'error');
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -1656,6 +1708,13 @@ function PaymentQRManager({
                   >
                     Delete
                   </button>
+                  <button
+                    onClick={() => openEditModal(item)}
+                    disabled={actionLoading === item._id}
+                    className="pill pill-outline text-xs"
+                  >
+                    Edit
+                  </button>
                 </div>
               </div>
             ))}
@@ -1672,6 +1731,89 @@ function PaymentQRManager({
           onConfirm={confirmDialog.onConfirm}
           onClose={() => setConfirmDialog(null)}
         />
+      )}
+
+      {editItem && (
+        <div
+          className="modal-backdrop"
+          onClick={(e) => { if (e.target === e.currentTarget && !editSaving) setEditItem(null); }}
+        >
+          <div className="glass-strong w-[min(92vw,36rem)] p-7 md:p-8">
+            <div className="mb-4 inline-flex rounded-full border border-black/12 bg-black/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-foreground/55">
+              Edit QR
+            </div>
+            <h3 className="admin-display text-xl font-bold leading-tight mb-6">Edit Payment QR</h3>
+            <form onSubmit={onSaveEdit} className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
+                  UPI ID *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="name@upi"
+                  value={editUpiId}
+                  onChange={(e) => setEditUpiId(e.target.value)}
+                  disabled={editSaving}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
+                  Amount (₹) *
+                </label>
+                <input
+                  type="number"
+                  className="input"
+                  placeholder="500"
+                  min={1}
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  disabled={editSaving}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
+                  Label (optional)
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="e.g. Primary UPI"
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  disabled={editSaving}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
+                  Replace QR Image (optional)
+                </label>
+                <input
+                  ref={editFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setEditQrFile(e.target.files?.[0] || null)}
+                  className="input text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-foreground/70 file:text-sm"
+                  disabled={editSaving}
+                />
+                <p className="text-xs text-foreground/40 mt-1">Leave empty to keep the existing QR image.</p>
+              </div>
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end mt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditItem(null)}
+                  disabled={editSaving}
+                  className="pill pill-outline text-sm"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="pill pill-primary text-sm" disabled={editSaving}>
+                  {editSaving ? <span className="spinner" /> : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

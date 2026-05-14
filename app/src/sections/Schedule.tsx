@@ -4,51 +4,133 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const scheduleItems = [
+type ScheduleSession = {
+  stage: string;
+  title: string;
+  description: string;
+  tag?: string;
+};
+
+type ScheduleItem = {
+  time: string;
+  sessions: ScheduleSession[];
+  isBreak?: boolean;
+};
+
+const scheduleItems: ScheduleItem[] = [
   {
-    time: '09:00 AM',
-    title: 'Registration & Welcome',
-    description: 'Arrival, check-in, first conversations, and a warm opening to the summit atmosphere.',
+    time: '9:30 AM – 10:00 AM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Networking over Tea',
+        description: 'Kick off the summit with warm conversations, new connections, and a welcoming atmosphere over tea.',
+      },
+    ],
   },
   {
-    time: '10:00 AM',
-    title: 'Inaugural Session',
-    description: 'Opening reflections, the summit vision, and the tone for a day centred on women, enterprise, and impact.',
+    time: '10:00 AM – 11:00 AM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Inaugural Session',
+        description: 'Opening reflections, the summit vision, and the tone for a day centred on women, enterprise, and impact.',
+      },
+    ],
   },
   {
-    time: '10:30 AM',
-    title: 'Ethical & Value-Based Business',
-    description: 'How principles, accountability, and values can strengthen business decisions and long-term growth.',
+    time: '11:00 AM – 11:10 AM',
+    isBreak: true,
+    sessions: [
+      {
+        stage: '',
+        title: 'Short Break',
+        description: 'A brief pause to refresh before the next session.',
+      },
+    ],
   },
   {
-    time: '11:30 AM',
-    title: 'Women Identity & Leadership',
-    description: 'Conversations on self-belief, leadership presence, and building with clarity in different life stages.',
+    time: '11:10 AM – 12:10 PM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Panel Discussion',
+        description: 'Exploring ethical finance, value-driven investments, and how Islamic financial principles empower women entrepreneurs.',
+        tag: 'Islamic Financial Perspective',
+      },
+    ],
   },
   {
-    time: '12:30 PM',
-    title: 'Panel Discussion',
-    description: 'Real stories from women entrepreneurs sharing honest lessons, turning points, and practical wisdom.',
+    time: '12:10 PM – 1:00 PM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Women Identity',
+        description: 'Conversations on self-belief, leadership presence, and building with clarity across different life and business stages.',
+      },
+    ],
   },
   {
-    time: '01:30 PM',
-    title: 'Networking Lunch',
-    description: 'A relaxed midpoint to build connections, continue discussions, and meet peers from across sectors.',
+    time: '1:00 PM – 2:00 PM',
+    isBreak: true,
+    sessions: [
+      {
+        stage: '',
+        title: 'Break & Networking',
+        description: 'A relaxed midpoint to build connections, continue discussions, and meet peers from across sectors.',
+      },
+    ],
   },
   {
-    time: '02:30 PM',
-    title: 'Digital Marketing & Branding',
-    description: 'Sharper thinking on messaging, online presence, audience connection, and digital visibility.',
+    time: '2:00 PM – 3:00 PM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Panel Discussion',
+        description: 'Real stories and honest lessons from leading entrepreneurs — turning points, resilience, and practical wisdom.',
+        tag: 'Leading Entrepreneurs',
+      },
+    ],
   },
   {
-    time: '03:30 PM',
-    title: 'Business Design Thinking',
-    description: 'Creative tools to refine offers, solve business problems, and build more intentional growth paths.',
+    time: '3:00 PM – 4:00 PM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Digital Marketing',
+        description: 'Sharper thinking on messaging, online presence, audience connection, and digital visibility for your business.',
+      },
+      {
+        stage: 'Sub Stage',
+        title: 'Strategic Business Thinking',
+        description: 'Creative tools to refine offers, solve business problems, and build more intentional growth paths.',
+      },
+    ],
   },
   {
-    time: '04:30 PM',
-    title: 'Special Consultation Desks',
-    description: 'Focused guidance and extended conversations for participants who want more tailored direction.',
+    time: '4:00 PM – 5:00 PM',
+    sessions: [
+      {
+        stage: 'Main Stage',
+        title: 'Closing Ceremony',
+        description: 'Reflections, recognitions, and a send-off that captures the spirit and energy of the day.',
+      },
+    ],
+  },
+];
+
+const consultationCounters = [
+  {
+    title: 'Islamic Finance Perspective',
+    description: 'One-on-one guidance on halal investment, ethical business finance, and Islamic economic frameworks.',
+  },
+  {
+    title: 'Crisis Management & Business Growth',
+    description: 'Practical strategies for navigating challenges, building resilience, and sustaining growth under pressure.',
+  },
+  {
+    title: 'Startup Ecosystem',
+    description: 'Insights on launching, scaling, and connecting within the broader startup and entrepreneurship landscape.',
   },
 ];
 
@@ -128,7 +210,7 @@ export default function Schedule() {
       ref={sectionRef}
       className="relative overflow-hidden py-20 sm:py-24 lg:py-32"
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <span
           ref={labelRef}
           className="section-label text-primary block text-center mb-4 sm:mb-6 opacity-0"
@@ -152,43 +234,151 @@ export default function Schedule() {
           <div className="space-y-8 sm:space-y-10 lg:space-y-12">
             {scheduleItems.map((item, i) => {
               const isLeft = i % 2 === 0;
+              const isParallel = item.sessions.length > 1;
+
               return (
                 <div
                   key={i}
                   className={`timeline-item relative flex items-start gap-4 sm:gap-6 lg:gap-0 opacity-0 ${
-                    isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'
+                    isParallel ? 'lg:flex-row' : isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'
                   }`}
                 >
+                  {/* Timeline dot */}
                   <div className="absolute left-4 z-10 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border-2 border-[#ff7abd] bg-[#1a0727] shadow-[0_0_15px_rgba(255,97,170,0.45)] animate-pulse-dot lg:left-1/2 lg:h-5 lg:w-5">
                     <div className="w-1.5 h-1.5 bg-[#ff7abd] rounded-full"></div>
                   </div>
 
-                  <div
-                    className={`ml-10 sm:ml-14 lg:ml-0 lg:w-[45%] ${
-                      isLeft ? 'lg:pr-12' : 'lg:pl-12'
-                    }`}
-                  >
-                    <div className="glass-card relative overflow-hidden p-5 sm:p-8 transition-all duration-300 hover:-translate-y-1">
-                      <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-white/10 blur-2xl -mr-16 -mt-16 transition-all duration-500" />
+                  {isParallel ? (
+                    /* Parallel sessions: show both cards side by side on desktop, stacked on mobile */
+                    <div className="ml-10 sm:ml-14 lg:ml-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+                      {item.sessions.map((session, si) => (
+                        <div
+                          key={si}
+                          className={`flex-1 ${si === 0 ? 'lg:pr-4' : 'lg:pl-4'}`}
+                        >
+                          <div
+                            className={`glass-card relative overflow-hidden p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 h-full border-t-2 ${
+                              si === 0 ? 'border-[#ff7abd]' : 'border-[#a78bfa]'
+                            }`}
+                          >
+                            <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-white/10 blur-2xl -mr-16 -mt-16 transition-all duration-500" />
 
-                      <span
-                        className="relative z-10 mb-4 inline-block rounded-full border border-white/14 bg-white/10 px-4 py-1.5 text-sm font-semibold text-[#ffd0e8] backdrop-blur-md"
-                      >
-                        {item.time}
-                      </span>
-                      <h3 className="relative z-10 font-['Syne'] text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm sm:text-base text-white/70 leading-relaxed">
-                        {item.description}
-                      </p>
+                            {/* Stage badge */}
+                            {session.stage && (
+                              <span
+                                className={`relative z-10 mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase ${
+                                  si === 0
+                                    ? 'bg-[#ff7abd]/20 text-[#ff7abd] border border-[#ff7abd]/40'
+                                    : 'bg-[#a78bfa]/20 text-[#c4b5fd] border border-[#a78bfa]/40'
+                                }`}
+                              >
+                                {session.stage}
+                              </span>
+                            )}
+
+                            <span className="relative z-10 mb-3 ml-2 inline-block rounded-full border border-white/14 bg-white/10 px-3 py-1 text-xs font-semibold text-[#ffd0e8] backdrop-blur-md">
+                              {item.time}
+                            </span>
+
+                            {session.tag && (
+                              <div className="relative z-10 mb-2">
+                                <span className="inline-block rounded-full bg-primary/20 border border-primary/40 px-3 py-0.5 text-xs font-semibold text-primary">
+                                  {session.tag}
+                                </span>
+                              </div>
+                            )}
+
+                            <h3 className="relative z-10 font-['Syne'] text-lg sm:text-xl font-bold text-white mb-2 tracking-tight">
+                              {session.title}
+                            </h3>
+                            <p className="text-sm text-white/70 leading-relaxed">
+                              {session.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  ) : (
+                    /* Single session */
+                    <>
+                      <div
+                        className={`ml-10 sm:ml-14 lg:ml-0 lg:w-[45%] ${
+                          isLeft ? 'lg:pr-12' : 'lg:pl-12'
+                        }`}
+                      >
+                        <div
+                          className={`glass-card relative overflow-hidden p-5 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${
+                            item.isBreak ? 'border-l-2 border-white/20' : ''
+                          }`}
+                        >
+                          <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-white/10 blur-2xl -mr-16 -mt-16 transition-all duration-500" />
 
-                  <div className="hidden lg:block lg:w-[45%]" />
+                          {item.sessions[0].stage && !item.isBreak && (
+                            <span className="relative z-10 mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase bg-[#ff7abd]/20 text-[#ff7abd] border border-[#ff7abd]/40 mr-2">
+                              {item.sessions[0].stage}
+                            </span>
+                          )}
+
+                          <span className="relative z-10 mb-4 inline-block rounded-full border border-white/14 bg-white/10 px-4 py-1.5 text-sm font-semibold text-[#ffd0e8] backdrop-blur-md">
+                            {item.time}
+                          </span>
+
+                          {item.sessions[0].tag && (
+                            <div className="relative z-10 mb-2 mt-1">
+                              <span className="inline-block rounded-full bg-primary/20 border border-primary/40 px-3 py-0.5 text-xs font-semibold text-primary">
+                                {item.sessions[0].tag}
+                              </span>
+                            </div>
+                          )}
+
+                          <h3 className="relative z-10 font-['Syne'] text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
+                            {item.sessions[0].title}
+                          </h3>
+                          <p className="text-sm sm:text-base text-white/70 leading-relaxed">
+                            {item.sessions[0].description}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="hidden lg:block lg:w-[45%]" />
+                    </>
+                  )}
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Consultation Counters */}
+        <div className="mt-16 sm:mt-20 lg:mt-24">
+          <div className="text-center mb-8 sm:mb-10">
+            <span className="inline-block rounded-full border border-white/14 bg-white/10 px-4 py-1.5 text-sm font-semibold text-[#ffd0e8] backdrop-blur-md mb-3">
+              2:00 PM – 4:00 PM
+            </span>
+            <h3 className="font-['Syne'] text-2xl sm:text-3xl font-bold text-white mt-2">
+              Consultation Counters
+            </h3>
+            <p className="text-white/60 text-sm sm:text-base mt-2">Near Main Stage — Open during afternoon sessions</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {consultationCounters.map((counter, i) => (
+              <div
+                key={i}
+                className="glass-card relative overflow-hidden p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 border-t-2 border-primary/50"
+              >
+                <div className="absolute top-0 right-0 h-24 w-24 rounded-full bg-primary/10 blur-2xl -mr-12 -mt-12" />
+                <span className="relative z-10 mb-3 inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 border border-primary/40 text-primary font-bold text-sm">
+                  {i + 1}
+                </span>
+                <h4 className="relative z-10 font-['Syne'] text-lg font-bold text-white mb-2 tracking-tight">
+                  {counter.title}
+                </h4>
+                <p className="relative z-10 text-sm text-white/70 leading-relaxed">
+                  {counter.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
