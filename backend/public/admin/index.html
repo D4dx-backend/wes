@@ -179,7 +179,7 @@
           <div class="text-xs text-white/50">Registration Dashboard</div>
         </div>
         <div class="flex items-center gap-3">
-          <button id="export-btn" class="pill pill-outline text-sm hidden md:inline-flex">Export CSV</button>
+          <button id="export-btn" class="pill pill-outline text-sm hidden md:inline-flex">Export Excel</button>
           <button id="logout-btn" class="pill pill-outline text-sm">Logout</button>
         </div>
       </div>
@@ -627,7 +627,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `wes-registrations-${new Date().toISOString().slice(0,10)}.csv`;
+        a.download = `wes-registrations-${new Date().toISOString().slice(0,10)}.xlsx`;
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
       } catch (err) {

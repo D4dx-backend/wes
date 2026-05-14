@@ -99,6 +99,14 @@ export default function RegistrationCTA() {
           ref={priceRef}
           className="mb-8 opacity-0 sm:mb-10"
         >
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2">
+            <span className="font-['Syne'] text-2xl sm:text-4xl font-bold text-white/35 line-through decoration-white/50">
+              ₹1,000
+            </span>
+            <span className="rounded-full bg-primary/20 border border-primary/50 px-3 py-1 text-xs sm:text-sm font-bold uppercase tracking-wider text-primary">
+              Early Bird Offer
+            </span>
+          </div>
           <span
             className="font-['Syne'] text-[52px] sm:text-[80px] font-bold tracking-tight"
             style={{
@@ -109,7 +117,7 @@ export default function RegistrationCTA() {
               filter: 'drop-shadow(0 10px 24px rgba(255, 112, 190, 0.28))',
             }}
           >
-            ₹1,000
+            ₹800
           </span>
           <span className="mt-2 block text-sm uppercase tracking-wider text-white/55">
             per participant

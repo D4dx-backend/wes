@@ -1,4 +1,5 @@
 const express = require('express');
+const XLSX = require('xlsx');
 const Registration = require('../models/Registration');
 const PaymentQR = require('../models/PaymentQR');
 const { requireAdmin } = require('../middleware/auth');
@@ -119,45 +120,67 @@ router.get('/registrations/export', async (req, res) => {
     const items = await Registration.find({}).sort({ createdAt: -1 }).lean();
 
     const fields = [
-      ['createdAt', 'Submitted At'],
-      ['fullName', 'Full Name'],
-      ['age', 'Age'],
-      ['whatsappNumber', 'WhatsApp'],
-      ['email', 'Email'],
-      ['district', 'District'],
-      ['paymentScreenshot', 'Payment Screenshot'],
-      ['paymentVerified', 'Payment Verified'],
-      ['ventureName', 'Venture/Business'],
-      ['industry', 'Industry'],
-      ['businessStage', 'Business Stage'],
-      ['businessScale', 'Business Scale'],
-      ['entryPassGenerated', 'Pass Generated'],
-      ['entryPassId', 'Pass ID'],
-      ['entryPassSentAt', 'Pass Sent At'],
+      ['createdAt',          'Submitted At'],
+      ['fullName',           'Full Name'],
+      ['age',                'Age'],
+      ['whatsappNumber',     'WhatsApp Number'],
+      ['email',              'Email'],
+      ['district',           'District'],
+      ['ventureName',        'Venture / Business Name'],
+      ['industry',           'Industry / Sector'],
+      ['businessStage',      'Business Stage'],
+      ['businessScale',      'Business Scale'],
+      ['paymentVerified',    'Payment Verified'],
+      ['entryPassGenerated', 'Entry Pass Generated'],
+      ['entryPassId',        'Entry Pass ID'],
+      ['entryPassUrl',       'Entry Pass URL'],
+      ['entryPassSentAt',    'Entry Pass Sent At'],
+      ['checkedIn',          'Checked In'],
+      ['checkedInAt',        'Checked In At'],
+      ['checkedInBy',        'Checked In By'],
+      ['updatedAt',          'Last Updated At'],
     ];
 
-    const escape = (val) => {
+    const toValue = (key, val) => {
       if (val === null || val === undefined) return '';
-      const s = String(val).replace(/"/g, '""');
-      return /[",\n]/.test(s) ? `"${s}"` : s;
+      if (key === 'createdAt' || key === 'updatedAt' || key === 'entryPassSentAt' || key === 'checkedInAt') {
+        return val ? new Date(val).toISOString() : '';
+      }
+      if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+      return val;
     };
 
-    const header = fields.map(([, label]) => label).join(',');
-    const rows = items
-      .map((it) =>
-        fields
-          .map(([key]) => {
-            const v = it[key];
-            if (key === 'createdAt' && v) return new Date(v).toISOString();
-            return escape(v);
-          })
-          .join(',')
-      )
-      .join('\n');
+    const rows = items.map((it) => {
+      const row = {};
+      fields.forEach(([key, label]) => {
+        row[label] = toValue(key, it[key]);
+      });
+      return row;
+    });
 
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="registrations.csv"');
-    res.send(header + '\n' + rows);
+    const worksheet = XLSX.utils.json_to_sheet(rows, {
+      header: fields.map(([, label]) => label),
+    });
+
+    // Auto-fit column widths
+    const colWidths = fields.map(([, label]) => {
+      const maxLen = Math.max(
+        label.length,
+        ...rows.map((r) => String(r[label] ?? '').length)
+      );
+      return { wch: Math.min(maxLen + 2, 60) };
+    });
+    worksheet['!cols'] = colWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
+
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    const filename = `wes-registrations-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
   } catch (err) {
     console.error('[admin] export error:', err);
     res.status(500).json({ error: 'Failed to export' });
@@ -240,6 +263,52 @@ router.post('/payment-qr', (req, res) => {
       }
       console.error('[admin] payment-qr create error:', err);
       res.status(500).json({ error: 'Failed to create payment QR' });
+    }
+  });
+});
+
+// Edit a payment QR config (upiId, amount, label; optionally replace image)
+router.patch('/payment-qr/:id', (req, res) => {
+  const upload = qrImageUpload.single('qrImage');
+
+  upload(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      const msg = uploadErr.code === 'LIMIT_FILE_SIZE'
+        ? 'File too large. Maximum size is 5MB.'
+        : uploadErr.message || 'File upload failed';
+      return res.status(400).json({ error: msg });
+    }
+
+    try {
+      const doc = await PaymentQR.findById(req.params.id);
+      if (!doc) return res.status(404).json({ error: 'Not found' });
+
+      const { upiId, amount, label } = req.body || {};
+
+      if (upiId !== undefined) doc.upiId = String(upiId).trim();
+      if (amount !== undefined) doc.amount = Number(amount);
+      if (label !== undefined) doc.label = String(label).trim();
+
+      if (req.file) {
+        // Delete old image from Spaces
+        const oldKey = keyFromUrl(doc.qrImage);
+        if (oldKey) await deleteFile(oldKey).catch(() => {});
+
+        doc.qrImage = getCdnUrl(req.file.key);
+      }
+
+      await doc.save();
+      res.json({ ok: true, item: doc });
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        const fields = {};
+        for (const key of Object.keys(err.errors)) {
+          fields[key] = err.errors[key].message;
+        }
+        return res.status(400).json({ error: 'Validation failed', fields });
+      }
+      console.error('[admin] payment-qr edit error:', err);
+      res.status(500).json({ error: 'Failed to update payment QR' });
     }
   });
 });

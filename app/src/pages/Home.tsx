@@ -20,11 +20,11 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const hiddenTriggerRef = useRef<HTMLButtonElement>(null);
 
-  // Show welcome popup after a short delay
-  useEffect(() => {
-    const timer = setTimeout(() => setShowPopup(true), 1800);
-    return () => clearTimeout(timer);
-  }, []);
+  // Show welcome popup after a short delay (temporarily hidden)
+  // useEffect(() => {
+  //   const timer = setTimeout(() => setShowPopup(true), 1800);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   useEffect(() => {
     const lenis = new Lenis({
