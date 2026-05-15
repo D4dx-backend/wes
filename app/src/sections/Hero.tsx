@@ -346,7 +346,11 @@ export default function Hero() {
               <p className="text-xs uppercase tracking-[0.24em] text-white/55">Registration</p>
               <div className="mt-3 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-4xl font-bold tracking-tight">₹1,000</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xl font-bold tracking-tight text-white/35 line-through decoration-white/50">₹1,000</p>
+                    <span className="rounded-full bg-primary/20 border border-primary/50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">Early Bird</span>
+                  </div>
+                  <p className="text-4xl font-bold tracking-tight">₹800</p>
                   <p className="mt-1 text-sm text-white/68">Per participant</p>
                 </div>
                 <div className="text-right text-xs uppercase tracking-[0.18em] text-white/55">
