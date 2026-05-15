@@ -758,6 +758,7 @@ function FiltersBar({
 }) {
   // local state for debounced text inputs
   const [search, setSearch] = useState(filters.search);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -768,9 +769,40 @@ function FiltersBar({
     return () => window.clearTimeout(t);
   }, [search, filters.search, onFilterChange]);
 
+  const isActive =
+    !!filters.search ||
+    !!filters.industry ||
+    !!filters.businessStage ||
+    !!filters.businessScale ||
+    !!filters.district;
+
   return (
     <div className="glass p-5">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+      {/* Toggle bar */}
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className={`pill pill-outline text-sm flex items-center gap-2 ${open || isActive ? 'border-[#e61980] text-[#e61980]' : ''}`}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+          </svg>
+          Filters
+          {isActive && (
+            <span className="rounded-full bg-[#e61980] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center leading-none">
+              {[filters.search, filters.industry, filters.businessStage, filters.businessScale, filters.district].filter(Boolean).length}
+            </span>
+          )}
+        </button>
+        <div className="text-sm text-foreground/50">
+          {resultCount !== null && `${resultCount} result${resultCount === 1 ? '' : 's'}`}
+        </div>
+      </div>
+
+      {/* Collapsible filter grid */}
+      {open && (
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-3">
         <div className="md:col-span-4">
           <label className="block text-xs font-medium uppercase tracking-wider text-foreground/60 mb-1.5">
             Search
@@ -896,11 +928,9 @@ function FiltersBar({
           <button onClick={onReset} className="pill pill-outline text-sm">
             Reset
           </button>
-          <div className="text-sm text-foreground/50 self-center">
-            {resultCount !== null && `${resultCount} result${resultCount === 1 ? '' : 's'}`}
-          </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
