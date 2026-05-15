@@ -38,17 +38,17 @@ const scheduleItems: ScheduleItem[] = [
       },
     ],
   },
-  {
-    time: '11:00 AM – 11:10 AM',
-    isBreak: true,
-    sessions: [
-      {
-        stage: '',
-        title: 'Short Break',
-        description: 'A brief pause to refresh before the next session.',
-      },
-    ],
-  },
+  // {
+  //   time: '11:00 AM – 11:10 AM',
+  //   isBreak: true,
+  //   sessions: [
+  //     {
+  //       stage: '',
+  //       title: 'Short Break',
+  //       description: 'A brief pause to refresh before the next session.',
+  //     },
+  //   ],
+  // },
   {
     time: '11:10 AM – 12:10 PM',
     sessions: [

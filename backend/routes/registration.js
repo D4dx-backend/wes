@@ -10,7 +10,7 @@ const {
 const { paymentScreenshotUpload, getCdnUrl } = require('../config/spaces');
 const { sendWhatsAppText } = require('../config/dxing');
 
-const SUPPORT_NUMBER = process.env.SUPPORT_WHATSAPP || '+91 9947846195';
+const SUPPORT_NUMBER = process.env.SUPPORT_WHATSAPP || '+91 ⁠7306057972';
 
 const router = express.Router();
 
